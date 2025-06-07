@@ -1,3 +1,16 @@
 @import "tailwindcss";
 @plugin "daisyui";
 
+@theme {
+    --color-primary-50: #f9f5f3;
+    --color-primary-100: #f0e7e0;    /* primary */
+    --color-primary-200: #e3d1c5;
+    --color-primary-300: #d0b3a1;
+    --color-primary-400: #bd8f7a;
+    --color-primary-500: #af7560;
+    --color-primary-600: #a26554;
+    --color-primary-700: #875147;
+    --color-primary-800: #6e443e;
+    --color-primary-900: #593935;
+    --color-primary-950: #2f1c1b;    /* secondary */
+}

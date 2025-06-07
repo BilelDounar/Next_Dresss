@@ -44,6 +44,7 @@ export default function HomePage() {
                 )}
             </div>
 
+
             {/* Bloc latéral visible uniquement sur grand écran */}
             {!loading && (
                 <div className="max-[750px]:hidden bg-amber-200 w-full">
