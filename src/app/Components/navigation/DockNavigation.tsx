@@ -15,7 +15,7 @@ export default function DockNavigation() {
                     </Link>
                 </li>
                 <li>
-                    <Link href="/recherche" aria-label="Recherche">
+                    <Link href="/search" aria-label="Recherche">
                         <button className="flex flex-col items-center">
                             <Search color="black" size={28} />
                             {/* <span className="dock-label text-black text-xs">Recherche</span> */}
@@ -23,9 +23,9 @@ export default function DockNavigation() {
                     </Link>
                 </li>
                 <li>
-                    <Link href="/creer" aria-label="Créer">
+                    <Link href="/create" aria-label="Créer">
                         <button className="flex flex-col items-center">
-                            <div className="py-1 px-3 bg-stone-200 rounded-tl-xl rounded-tr-none rounded-br-xl rounded-bl-none ">
+                            <div className="py-1 px-3 bg-primary-100 rounded-tl-xl rounded-tr-none rounded-br-xl rounded-bl-none ">
                                 <Plus color="black" size={30} />
                             </div>
                         </button>

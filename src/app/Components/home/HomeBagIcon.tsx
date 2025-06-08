@@ -16,7 +16,7 @@ const HomeBagIcon = ({ value }: { value: string }) => (
             fill="#845555"
         />
         <text
-            x="9.5"
+            x="9"
             y="19"
             textAnchor="middle"
             fontSize="13"
