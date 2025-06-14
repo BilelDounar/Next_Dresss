@@ -1,6 +1,6 @@
+@import url("https://fonts.googleapis.com/css2?family=Asap:wdth,wght@75..125,100..900&family=DM+Serif+Text&family=Montserrat:wght@100..900&family=Outfit:wght@100..900&display=swap");
 @import "tailwindcss";
 @import "tw-animate-css";
-@import url("https://fonts.googleapis.com/css2?family=Asap:wdth,wght@75..125,100..900&family=DM+Serif+Text&family=Montserrat:wght@100..900&family=Outfit:wght@100..900&display=swap");
 
 @custom-variant dark (&:is(.dark *));
 @plugin "daisyui";
@@ -13,12 +13,12 @@
 }
 
 @theme {
-  --color-primary-100: #F4F3EF;
-  --color-primary-300: #E7E2DF;
-  --color-primary-500: #DAD1CE;
-  --color-primary-700: #A68D8B;
+  --color-primary-100: #f4f3ef;
+  --color-primary-300: #e7e2df;
+  --color-primary-500: #dad1ce;
+  --color-primary-700: #a68d8b;
   --color-primary-900: #886969;
-  --color-light-gray: #BABABA;
+  --color-light-gray: #bababa;
   --color-dark-gray: #656565;
 }
 

@@ -2,7 +2,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import DockNavigation from "@/app/Components/navigation/DockNavigation";
+import DockNavigationWrapper from "@/app/Components/navigation/DockNavigationWrapper";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,7 +29,7 @@ export default function RootLayout({
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <main className="">{children}</main>
         <div className="h-[8vh] min-[750px]:h-0"></div>
-        <DockNavigation />
+        <DockNavigationWrapper />
       </body>
     </html>
   );

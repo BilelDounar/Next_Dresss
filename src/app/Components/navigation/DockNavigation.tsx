@@ -1,52 +1,53 @@
 // components/DockNavigation.tsx
 import { Plus, Bell, Search, User, House } from 'lucide-react';
 import Link from 'next/link';
+import { cn } from '@/lib/utils';
 
-export default function DockNavigation() {
+type DockNavigationProps = {
+    activePath?: string;
+};
+
+export default function DockNavigation({ activePath = '/' }: DockNavigationProps) {
+    const navItems = [
+        { href: '/home', label: 'Accueil', icon: House },
+        { href: '/search', label: 'Recherche', icon: Search },
+        { href: '/create', label: 'Créer', icon: Plus },
+        { href: '/notifications', label: 'Notifications', icon: Bell },
+        { href: '/profil', label: 'Profil', icon: User },
+    ];
+
     return (
-        <nav className=" bg-white h-1/12 fixed bottom-0 left-0 right-0 shadow-lg z-50 min-[750px]:max-w-[500px] min-[750px]:invisible" aria-label="Navigation principale">
-            <ul className="flex justify-around items-center py-2">
-                <li>
-                    <Link href="/" aria-label="Accueil">
-                        <button className="flex flex-col items-center">
-                            <House color="black" size={28} />
-                            {/* <span className="dock-label text-black text-xs">Home</span> */}
-                        </button>
-                    </Link>
-                </li>
-                <li>
-                    <Link href="/search" aria-label="Recherche">
-                        <button className="flex flex-col items-center">
-                            <Search color="black" size={28} />
-                            {/* <span className="dock-label text-black text-xs">Recherche</span> */}
-                        </button>
-                    </Link>
-                </li>
-                <li>
-                    <Link href="/create" aria-label="Créer">
-                        <button className="flex flex-col items-center">
-                            <div className="py-1 px-3 bg-primary-100 rounded-tl-xl rounded-tr-none rounded-br-xl rounded-bl-none ">
-                                <Plus color="black" size={30} />
-                            </div>
-                        </button>
-                    </Link>
-                </li>
-                <li>
-                    <Link href="/notifications" aria-label="Notifications">
-                        <button className="flex flex-col items-center">
-                            <Bell color="black" size={28} />
-                            {/* <span className="dock-label text-black text-xs">Notifications</span> */}
-                        </button>
-                    </Link>
-                </li>
-                <li>
-                    <Link href="/profil" aria-label="Profil">
-                        <button className="flex flex-col items-center">
-                            <User color="black" size={28} />
-                            {/* <span className="dock-label text-black text-xs">Profil</span> */}
-                        </button>
-                    </Link>
-                </li>
+        <nav className="bg-white fixed bottom-0 left-0 right-0 shadow-lg z-50 min-[750px]:invisible" aria-label="Navigation principale">
+            <ul className="flex justify-around items-center py-2 px-2">
+                {navItems.map(({ href, label, icon: Icon }) => {
+                    const isActive = activePath === href;
+                    if (href === '/create') {
+                        return (
+                            <li key={href}>
+                                <Link href={href} aria-label={label}>
+                                    <button className="flex flex-col items-center p-2">
+                                        <div className="py-1 px-3 bg-primary-100 rounded-tl-xl rounded-tr-none rounded-br-xl rounded-bl-none ">
+                                            <Icon color="black" size={30} />
+                                        </div>
+                                    </button>
+                                </Link>
+                            </li>
+                        );
+                    }
+                    return (
+                        <li key={href}>
+                            <Link href={href} aria-label={label}>
+                                <button className={cn(
+                                    "flex items-center gap-x-1.5 py-2 px-3 transition-all duration-300 rounded-full",
+                                    isActive ? "bg-primary-300 text-primary-900 " : "bg-transparent"
+                                )}>
+                                    <Icon size={28} />
+                                    {isActive && <span className=" text-sm font-medium">{label}</span>}
+                                </button>
+                            </Link>
+                        </li>
+                    );
+                })}
             </ul>
         </nav>
     );

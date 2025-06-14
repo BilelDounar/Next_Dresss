@@ -4,6 +4,7 @@ import { Bookmark, Heart, MessageCircle, Share2 } from "lucide-react";
 import { useEffect, useRef, useState, Fragment } from "react";
 import HomeBagIcon from "../home/HomeBagIcon";
 import { Dialog, Transition } from "@headlessui/react";
+import AvatarAtom from "@/components/atom/avatar";
 
 type SlideProps = {
     id: number;
@@ -153,11 +154,7 @@ export default function Slide({ id, content }: SlideProps) {
 
             <div className="absolute bottom-4 px-4 w-full flex justify-between items-center">
                 <div className="flex flex-row gap-4">
-                    <div className="avatar avatar-online avatar-placeholder">
-                        <div className="bg-primary-100 text-primary-900 font-bold w-14 rounded-full flex justify-center items-center">
-                            <span className="text-2xl">D</span>
-                        </div>
-                    </div>
+                    <AvatarAtom src="https://avatars.githubusercontent.com/u/105309377?v=4" alt="BD" size="md" isFollowed={false} onClick={() => console.log("clicked")}  />
                     <div>
                         <h2 className="text-white text-lg font-bold">@Bilel</h2>
                         <p className="text-white font-normal truncate w-full max-w-[140px] min-[500px]:max-w-[250px] min-[600px]:max-w-[400px] min-[749px]:max-w-[500px] min-[750px]:max-w-[0]">
