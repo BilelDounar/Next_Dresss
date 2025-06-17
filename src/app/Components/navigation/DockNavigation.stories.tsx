@@ -21,6 +21,12 @@ type Story = StoryObj<typeof meta>;
 
 export const Default = {
     args: {
+        activePath: '/create',
+    },
+} satisfies Story;
+
+export const HomeActive = {
+    args: {
         activePath: '/home',
     },
 } satisfies Story;

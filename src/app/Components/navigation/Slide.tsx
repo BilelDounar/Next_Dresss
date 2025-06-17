@@ -1,10 +1,13 @@
 "use client";
 
-import { Bookmark, Heart, MessageCircle, Share2 } from "lucide-react";
+import { Bookmark, Heart, MessageCircle, ExternalLink, Share2 } from "lucide-react";
 import { useEffect, useRef, useState, Fragment } from "react";
 import HomeBagIcon from "../home/HomeBagIcon";
 import { Dialog, Transition } from "@headlessui/react";
 import AvatarAtom from "@/components/atom/avatar";
+import Button from "@/components/atom/button";
+import CardItem from "../home/CardItem";
+import ActionButton from "../home/ActionButton";
 
 type SlideProps = {
     id: number;
@@ -118,13 +121,11 @@ export default function Slide({ id, content }: SlideProps) {
             className="snap-start h-[92vh] min-[750px]:min-[600px]:h-screen flex flex-col border-b border-gray-300 relative"
             style={{ background: `hsl(${id * 30}, 70%, 80%)` }}
         >
-            <div className="absolute bottom-30 right-4 flex flex-col gap-y-5">
-                {[Heart, MessageCircle, Share2, Bookmark].map((Icon, index) => (
-                    <div key={index} className="flex flex-col justify-center text-center">
-                        <Icon color="white" size={40} className="drop-shadow" />
-                        <span className="text-xl text-white font-semibold">50k</span>
-                    </div>
-                ))}
+            <div className="absolute bottom-36 right-4 flex flex-col justify-center items-center gap-y-5">
+                <ActionButton Icon={Heart} count={500} />
+                <ActionButton Icon={MessageCircle} count={500} />
+                <ActionButton Icon={Share2} count={500} />
+                <ActionButton Icon={Bookmark} count={500} />
             </div>
 
             <div
@@ -143,7 +144,7 @@ export default function Slide({ id, content }: SlideProps) {
                 ))}
             </div>
 
-            <div className="absolute bottom-25 left-1/2 transform -translate-x-1/2 flex gap-2">
+            <div className="absolute bottom-22 left-1/2 transform -translate-x-1/2 flex gap-2">
                 {dotIndices().map((idx) => (
                     <span
                         key={idx}
@@ -154,7 +155,7 @@ export default function Slide({ id, content }: SlideProps) {
 
             <div className="absolute bottom-4 px-4 w-full flex justify-between items-center">
                 <div className="flex flex-row gap-4">
-                    <AvatarAtom src="https://avatars.githubusercontent.com/u/105309377?v=4" alt="BD" size="md" isFollowed={false} onClick={() => console.log("clicked")}  />
+                    <AvatarAtom src="https://avatars.githubusercontent.com/u/105309377?v=4" alt="BD" size="md" isFollowed={false} onClick={() => console.log("clicked")} />
                     <div>
                         <h2 className="text-white text-lg font-bold">@Bilel</h2>
                         <p className="text-white font-normal truncate w-full max-w-[140px] min-[500px]:max-w-[250px] min-[600px]:max-w-[400px] min-[749px]:max-w-[500px] min-[750px]:max-w-[0]">
@@ -163,11 +164,12 @@ export default function Slide({ id, content }: SlideProps) {
                     </div>
                 </div>
                 <div>
+
                     <button
                         className="btn border-none bg-white rounded-full px-4 py-2.5 flex flex-row gap-x-1 items-center"
                         onClick={() => setIsModalOpen(true)}
                     >
-                        <HomeBagIcon value="1" />
+                        <HomeBagIcon value="7" />
                         <span className="text-base font-semibold text-gray-800">articles</span>
                     </button>
                 </div>
@@ -201,15 +203,15 @@ export default function Slide({ id, content }: SlideProps) {
                     >
                         <div
                             ref={sheetRef}
-                            className="absolute bottom-0 w-full h-[70vh] bg-white rounded-t-2xl shadow-xl p-6"
+                            className="absolute bottom-0 w-full h-[80vh] bg-white rounded-t-2xl shadow-xl p-6"
                             style={{
                                 transform: `translateY(${dragOffset}px)`,
                                 transition: isDragging ? "none" : "transform 0.2s ease-out",
                             }}
                         >
                             <div className="mx-auto mb-2 w-12 h-1.5 bg-gray-300 rounded-full" />
-                            <div className="flex justify-between items-center mb-4">
-                                <h2 className="text-lg font-semibold">Tes articles</h2>
+                            <div className="flex justify-between items-center my-4">
+                                <h2 className="text-lg font-semibold font-outfit">Ou les retrouver ?</h2>
                                 <button
                                     className="text-gray-500 hover:text-gray-800"
                                     onClick={() => setIsModalOpen(false)}
@@ -217,30 +219,12 @@ export default function Slide({ id, content }: SlideProps) {
                                     Fermer
                                 </button>
                             </div>
-                            <div className="overflow-y-auto h-full gap-y-2 pr-2 flex flex-row gap-x-2 justify-between flex-wrap mb-[2000px]">
+                            <div className=" flex flex-col h-full gap-y-4 overflow-y-scroll pb-28">
 
-
-                                <div className="flex flex-row items-center bg-white border border-gray-200 rounded-lg shadow-sm md:flex-row md:max-w-xl hover:bg-gray-100 h-fit">
-                                    <img className="object-cover w-[100px] h-[100px] rounded-t-lg md:h-auto md:w-48 md:rounded-none md:rounded-s-lg" src="/icons/icon-256x256.png" alt="" />
-                                    <div className="flex flex-col justify-between p-4 leading-normal">
-                                        <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Noteworthy technology acquisitions 2021</h5>
-                                        <p className="mb-3 font-normal text-gray-700 dark:text-gray-400">Here are the biggest enterprise technology acquisitions of 2021 so far, in reverse chronological order.</p>
-                                    </div>
-                                </div>
-                                <div className="flex flex-row items-center bg-white border border-gray-200 rounded-lg shadow-sm md:flex-row md:max-w-xl hover:bg-gray-100 h-fit">
-                                    <img className="object-cover w-[100px] h-[100px] rounded-t-lg md:h-auto md:w-48 md:rounded-none md:rounded-s-lg" src="/icons/icon-256x256.png" alt="" />
-                                    <div className="flex flex-col justify-between p-4 leading-normal">
-                                        <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Noteworthy technology acquisitions 2021</h5>
-                                        <p className="mb-3 font-normal text-gray-700 dark:text-gray-400">Here are the biggest enterprise technology acquisitions of 2021 so far, in reverse chronological order.</p>
-                                    </div>
-                                </div>
-                                <div className="flex flex-row items-center bg-white border border-gray-200 rounded-lg shadow-sm md:flex-row md:max-w-xl hover:bg-gray-100 h-fit">
-                                    <img className="object-cover w-[100px] h-[100px] rounded-t-lg md:h-auto md:w-48 md:rounded-none md:rounded-s-lg" src="/icons/icon-256x256.png" alt="" />
-                                    <div className="flex flex-col justify-between p-4 leading-normal">
-                                        <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Noteworthy technology acquisitions 2021</h5>
-                                        <p className="mb-3 font-normal text-gray-700 dark:text-gray-400">Here are the biggest enterprise technology acquisitions of 2021 so far.</p>
-                                    </div>
-                                </div>
+                                <CardItem key={1} price={85} title="Pantalon" description="Lorem ipsum dolor sit amet consectetur adipisicing elit." openLink={"https://google.com"} />
+                                <CardItem key={2} price={17} title="Pantalon" description="Lorem ipsum dolor sit amet consectetur adipisicing elit." openLink={"https://google.com"} />
+                                <CardItem key={3} price={17} title="Pantalon" description="Lorem ipsum dolor sit amet consectetur adipisicing elit." openLink={"https://google.com"} />
+                                <CardItem key={4} price={781} title="Pantalon" description="Lorem ipsum dolor sit amet consectetur adipisicing elit." openLink={"https://google.com"} />
 
                             </div>
                         </div>

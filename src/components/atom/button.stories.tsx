@@ -1,6 +1,6 @@
 import { type Meta, type StoryObj } from "@storybook/nextjs-vite";
 import Button from "@/components/atom/button";
-import { fn } from "storybook/test"
+import { fn } from "storybook/test";
 
 const meta = {
     title: "Components/Atom/Button",
@@ -18,6 +18,9 @@ const meta = {
             control: "radio",
             options: ["default", "sm", "lg"],
         },
+        // Masquer iconLeft et iconRight des contrôles Storybook
+        iconLeft: { table: { disable: true } },
+        iconRight: { table: { disable: true } },
     },
 } satisfies Meta<typeof Button>;
 
