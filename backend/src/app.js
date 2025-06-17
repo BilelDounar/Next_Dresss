@@ -5,6 +5,8 @@ const morgan = require('morgan');
 
 const app = express();
 
+const publicationRoutes = require('./api/routes/publicationRoutes');
+
 // --- Middlewares ---
 
 // Middleware pour parser les requêtes JSON
@@ -25,6 +27,8 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 // --- Routes ---
+app.use('/api/publications', publicationRoutes);
+
 
 // Route de test pour vérifier que le serveur fonctionne
 app.get('/', (req, res) => {

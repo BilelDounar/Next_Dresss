@@ -17,7 +17,7 @@ export default function DockNavigation({ activePath = '/' }: DockNavigationProps
     ];
 
     return (
-        <nav className="bg-white fixed bottom-0 left-0 right-0 shadow-lg z-50 min-[750px]:invisible" aria-label="Navigation principale">
+        <nav className="bg-white fixed bottom-0 left-0 right-0 shadow-lg z-50 min-[750px]:invisible pb-2" aria-label="Navigation principale">
             <ul className="flex justify-around items-center py-2 px-2">
                 {navItems.map(({ href, label, icon: Icon }) => {
                     const isActive = activePath === href;

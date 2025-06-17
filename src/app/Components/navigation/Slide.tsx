@@ -10,12 +10,32 @@ import CardItem from "../home/CardItem";
 import ActionButton from "../home/ActionButton";
 import { BookmarkIcon, CommentIcon, HeartIcon, ShareIcon } from "../home/ActionIconSVG";
 
-type SlideProps = {
-    id: number;
-    content: string;
+// Type pour un article
+type Article = {
+    _id: string; // Utiliser _id qui vient de MongoDB
+    titre: string;
+    description: string;
+    prix: number;
+    urlPhoto: string;
+    lien?: string;
 };
 
-export default function Slide({ id, content }: SlideProps) {
+// Type pour une publication
+type Publication = {
+    _id: string;
+    description: string;
+    user: string;
+    urlsPhotos?: string[];
+    articles?: Article[];
+};
+
+// Type pour les props du composant Slide
+type SlideProps = {
+    publication: Publication;
+    id: number; // Gardé pour le style de fond
+};
+
+export default function Slide({ publication, id }: SlideProps) {
     const containerRef = useRef<HTMLDivElement>(null);
     const horizontalRef = useRef<HTMLDivElement>(null);
     const [isVisible, setIsVisible] = useState(false);
@@ -26,7 +46,40 @@ export default function Slide({ id, content }: SlideProps) {
     const [dragOffset, setDragOffset] = useState(0);
     const [isDragging, setIsDragging] = useState(false);
 
-    const slidesCount = 10;
+    const [articles, setArticles] = useState<Article[]>([]);
+    const [loadingArticles, setLoadingArticles] = useState(true);
+
+    // La publication actuelle est directement celle passée en props.
+    const currentPublication = publication;
+
+    useEffect(() => {
+        const fetchArticlesForCurrentPublication = async () => {
+            if (!currentPublication) {
+                setArticles([]);
+                return;
+            }
+
+            setLoadingArticles(true);
+            try {
+                const response = await fetch(`http://192.168.2.103:5000/api/publications/${currentPublication._id}/articles`);
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch articles for publication ${currentPublication._id}`);
+                }
+                const articlesData: Article[] = await response.json();
+                setArticles(articlesData);
+            } catch (error) {
+                console.error("Error fetching articles:", error);
+                setArticles([]);
+            } finally {
+                setLoadingArticles(false);
+            }
+        };
+
+        fetchArticlesForCurrentPublication();
+    }, [currentPublication]);
+
+    // Calcule le nombre de diapositives en toute sécurité.
+    const slidesCount = currentPublication?.urlsPhotos?.length || 0;
     const visibleDots = 3;
 
     useEffect(() => {
@@ -51,6 +104,15 @@ export default function Slide({ id, content }: SlideProps) {
             setActiveIndex(0);
         }
     }, [isVisible]);
+
+    useEffect(() => {
+        if (horizontalRef.current) {
+            const scrollLeft = horizontalRef.current.scrollLeft;
+            const width = horizontalRef.current.offsetWidth;
+            const index = Math.round(scrollLeft / width);
+            setActiveIndex(index);
+        }
+    }, [horizontalRef]);
 
     const handleScroll = () => {
         if (horizontalRef.current) {
@@ -157,13 +219,10 @@ export default function Slide({ id, content }: SlideProps) {
         },
     ];
 
-
-
     return (
         <div
             ref={containerRef}
-            className="snap-start h-[92vh] min-[750px]:min-[600px]:h-screen flex flex-col border-b border-gray-300 relative"
-            style={{ background: `hsl(${id * 30}, 70%, 80%)` }}
+            className="w-full h-[90vh] min-[750px]:min-[600px]:h-screen flex flex-col relative bg-primary-300" // Taille contrôlée par le parent, fond noir
         >
             <div className="absolute bottom-36 right-4 flex flex-col justify-center items-center gap-y-5">
                 {actions.map(({ icon, count, onClick }, index) => (
@@ -176,19 +235,22 @@ export default function Slide({ id, content }: SlideProps) {
                 ))}
             </div>
 
-
             <div
                 ref={horizontalRef}
                 className="flex overflow-x-scroll snap-x snap-mandatory w-full h-full"
                 onScroll={handleScroll}
             >
-                {Array.from({ length: slidesCount }).map((_, num) => (
+                {currentPublication?.urlsPhotos?.map((url, idx) => (
                     <div
-                        key={num}
-                        className="snap-start w-full flex-shrink-0 flex items-center justify-center text-black text-2xl"
+                        key={`${currentPublication._id}-${idx}`}
+                        className="snap-start w-full h-full flex-shrink-0 flex items-center justify-center bg-primary-300" // Assure un fond noir pour l'image
                         style={{ minWidth: "100%" }}
                     >
-                        Slide {num + 1} of {content}
+                        <img
+                            src={url}
+                            alt={`Photo ${idx + 1} de la publication`}
+                            className="w-full h-full object-contain" // Affiche l'image entière
+                        />
                     </div>
                 ))}
             </div>
@@ -202,31 +264,35 @@ export default function Slide({ id, content }: SlideProps) {
                 ))}
             </div>
 
-            <div className="absolute bottom-4 px-4 w-full flex justify-between items-center">
-                <div className="flex flex-row gap-4">
-                    <AvatarAtom src="https://avatars.githubusercontent.com/u/105309377?v=4" alt="BD" size="md" isFollowed={false} onClick={() => console.log("clicked")} />
+            {currentPublication && (
+                <div className="absolute bottom-4 px-4 w-full flex justify-between items-center">
+                    <div className="flex flex-row gap-4">
+                        <AvatarAtom src="https://avatars.githubusercontent.com/u/105309377?v=4" alt="BD" size="md" isFollowed={false} onClick={() => console.log("clicked")} />
+                        <div>
+                            <h2 className="text-white font-bold text-lg truncate w-full max-w-[140px] min-[500px]:max-w-[250px] min-[600px]:max-w-[400px] min-[749px]:max-w-[500px] min-[750px]:max-w-[0]">
+                                {currentPublication._id}
+                            </h2>
+                            <p className="text-white font-normal text-md truncate w-full max-w-[140px] min-[500px]:max-w-[250px] min-[600px]:max-w-[400px] min-[749px]:max-w-[500px] min-[750px]:max-w-[0]">
+                                {currentPublication.description}
+                            </p>
+                        </div>
+                    </div>
+
                     <div>
-                        <h2 className="text-white text-lg font-bold">@Bilel</h2>
-                        <p className="text-white font-normal truncate w-full max-w-[140px] min-[500px]:max-w-[250px] min-[600px]:max-w-[400px] min-[749px]:max-w-[500px] min-[750px]:max-w-[0]">
-                            lorem ipsum dolor sit amet consectetur adipisicing elit.
-                        </p>
+                        <button
+                            className="btn border-none bg-white rounded-full px-4 py-2.5 flex flex-row gap-x-1 items-center"
+                            onClick={() => setIsModalOpen(true)}
+                        >
+                            <HomeBagIcon value={articles.length.toString()} />
+                            <span className="text-base font-semibold text-gray-800">articles</span>
+                        </button>
                     </div>
                 </div>
-                <div>
-
-                    <button
-                        className="btn border-none bg-white rounded-full px-4 py-2.5 flex flex-row gap-x-1 items-center"
-                        onClick={() => setIsModalOpen(true)}
-                    >
-                        <HomeBagIcon value="7" />
-                        <span className="text-base font-semibold text-gray-800">articles</span>
-                    </button>
-                </div>
-            </div>
+            )}
 
             <Transition show={isModalOpen} as={Fragment}>
                 <div className="fixed inset-0 z-50">
-                    <Transition.Child
+                    <Transition
                         as={Fragment}
                         enter="ease-out duration-200"
                         enterFrom="opacity-0"
@@ -239,9 +305,9 @@ export default function Slide({ id, content }: SlideProps) {
                             className="absolute inset-0 bg-black/20 bg-opacity-40"
                             onClick={() => setIsModalOpen(false)}
                         />
-                    </Transition.Child>
+                    </Transition>
 
-                    <Transition.Child
+                    <Transition
                         as={Fragment}
                         enter="ease-out duration-300"
                         enterFrom="translate-y-full"
@@ -269,15 +335,12 @@ export default function Slide({ id, content }: SlideProps) {
                                 </button>
                             </div>
                             <div className=" flex flex-col h-full gap-y-4 overflow-y-scroll pb-28">
-
-                                <CardItem key={1} price={85} title="Pantalon" description="Lorem ipsum dolor sit amet consectetur adipisicing elit." openLink={"https://google.com"} />
-                                <CardItem key={2} price={17} title="Pantalon" description="Lorem ipsum dolor sit amet consectetur adipisicing elit." openLink={"https://google.com"} />
-                                <CardItem key={3} price={17} title="Pantalon" description="Lorem ipsum dolor sit amet consectetur adipisicing elit." openLink={"https://google.com"} />
-                                <CardItem key={4} price={781} title="Pantalon" description="Lorem ipsum dolor sit amet consectetur adipisicing elit." openLink={"https://google.com"} />
-
+                                {!loadingArticles && articles.map((article) => (
+                                    <CardItem key={article._id} price={article.prix} title={article.titre} description={article.description} urlPhoto={article.urlPhoto} openLink={article.lien || '#'} />
+                                ))}
                             </div>
                         </div>
-                    </Transition.Child>
+                    </Transition>
                 </div>
             </Transition>
         </div>
