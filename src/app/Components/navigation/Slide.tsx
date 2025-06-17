@@ -1,6 +1,6 @@
 "use client";
 
-import { Bookmark, Heart, MessageCircle, ExternalLink, Share2 } from "lucide-react";
+// import { Bookmark, Heart, MessageCircle, ExternalLink, Share2 } from "lucide-react";
 import { useEffect, useRef, useState, Fragment } from "react";
 import HomeBagIcon from "../home/HomeBagIcon";
 import { Dialog, Transition } from "@headlessui/react";
@@ -8,6 +8,7 @@ import AvatarAtom from "@/components/atom/avatar";
 import Button from "@/components/atom/button";
 import CardItem from "../home/CardItem";
 import ActionButton from "../home/ActionButton";
+import { BookmarkIcon, CommentIcon, HeartIcon, ShareIcon } from "../home/ActionIconSVG";
 
 type SlideProps = {
     id: number;
@@ -115,6 +116,49 @@ export default function Slide({ id, content }: SlideProps) {
         };
     }, [dragOffset, isDragging]);
 
+    const [isLiked, setIsLiked] = useState(false);
+    const [isSaved, setIsSaved] = useState(false);
+    const [isAnimatingHeart, setIsAnimatingHeart] = useState(false);
+    const [isAnimatingMark, setIsAnimatingMark] = useState(false);
+    const actions = [
+        {
+            icon: (
+                <div className={`transition-transform duration-200 ease-out ${isAnimatingHeart ? "scale-125" : "scale-100"}`}>
+                    <HeartIcon fill={isLiked ? "red" : "white"} />
+                </div>
+            ),
+            count: 500,
+            onClick: () => {
+                setIsLiked(!isLiked);
+                setIsAnimatingHeart(true);
+                setTimeout(() => setIsAnimatingHeart(false), 200); // réinitialise après 200ms
+            },
+        },
+        {
+            icon: <CommentIcon fill="white" />,
+            count: 120,
+            onClick: () => console.log("comment"),
+        },
+        {
+            icon: <ShareIcon fill="white" />,
+            count: 75,
+            onClick: () => console.log("share"),
+        },
+        {
+            icon: <div className={`transition-transform duration-200 ease-out ${isAnimatingMark ? "scale-125" : "scale-100"}`}>
+                <BookmarkIcon fill={isSaved ? "yellow" : "white"} />
+            </div>,
+            count: 520,
+            onClick: () => {
+                setIsSaved(!isSaved);
+                setIsAnimatingMark(true);
+                setTimeout(() => setIsAnimatingMark(false), 200); // réinitialise après 200ms
+            },
+        },
+    ];
+
+
+
     return (
         <div
             ref={containerRef}
@@ -122,11 +166,16 @@ export default function Slide({ id, content }: SlideProps) {
             style={{ background: `hsl(${id * 30}, 70%, 80%)` }}
         >
             <div className="absolute bottom-36 right-4 flex flex-col justify-center items-center gap-y-5">
-                <ActionButton Icon={Heart} count={500} />
-                <ActionButton Icon={MessageCircle} count={500} />
-                <ActionButton Icon={Share2} count={500} />
-                <ActionButton Icon={Bookmark} count={500} />
+                {actions.map(({ icon, count, onClick }, index) => (
+                    <ActionButton
+                        key={index}
+                        Icon={icon}
+                        count={count}
+                        onClick={onClick}
+                    />
+                ))}
             </div>
+
 
             <div
                 ref={horizontalRef}
