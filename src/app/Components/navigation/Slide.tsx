@@ -53,6 +53,29 @@ export default function Slide({ publication, id }: SlideProps) {
     const currentPublication = publication;
 
     useEffect(() => {
+        const markAsViewed = async () => {
+            if (isVisible && currentPublication) {
+                try {
+                    // TODO: Replace with the actual authenticated user's ID
+                    const userId = "6671c4a13123282b79c3a25a"; // Hardcoded for demonstration
+                    const apiUrl = process.env.NEXT_PUBLIC_API_MONGO;
+                    await fetch(`${apiUrl}/api/publications/${currentPublication._id}/view`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ userId }),
+                    });
+                } catch (error) {
+                    console.error("Failed to mark publication as viewed:", error);
+                }
+            }
+        };
+
+        markAsViewed();
+    }, [isVisible, currentPublication]);
+
+    useEffect(() => {
         const fetchArticlesForCurrentPublication = async () => {
             if (!currentPublication) {
                 setArticles([]);
@@ -61,7 +84,8 @@ export default function Slide({ publication, id }: SlideProps) {
 
             setLoadingArticles(true);
             try {
-                const response = await fetch(`http://192.168.2.103:5000/api/publications/${currentPublication._id}/articles`);
+                const apiUrl = process.env.NEXT_PUBLIC_API_MONGO;
+                const response = await fetch(`${apiUrl}/api/publications/${currentPublication._id}/articles`);
                 if (!response.ok) {
                     throw new Error(`Failed to fetch articles for publication ${currentPublication._id}`);
                 }

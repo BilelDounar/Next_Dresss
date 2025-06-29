@@ -23,7 +23,10 @@ export default function HomePage() {
         const fetchPublications = async () => {
             setLoading(true);
             try {
-                const response = await fetch("http://192.168.2.103:5000/api/publications");
+                // TODO: Replace with the actual authenticated user's ID
+                const userId = "6671c4a13123282b79c3a25a"; // Hardcoded for demonstration
+                const apiUrl = process.env.NEXT_PUBLIC_API_MONGO;
+                const response = await fetch(`${apiUrl}/api/publications?userId=${userId}`);
                 if (!response.ok) {
                     throw new Error('La réponse du réseau n\'était pas bonne');
                 }

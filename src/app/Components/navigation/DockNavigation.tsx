@@ -1,6 +1,9 @@
 // components/DockNavigation.tsx
-import { Plus, Bell, Search, User, House } from 'lucide-react';
+"use client";
+
+import { Plus, Bell, Search, User, House, LogOut } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 
 type DockNavigationProps = {
@@ -8,6 +11,7 @@ type DockNavigationProps = {
 };
 
 export default function DockNavigation({ activePath = '/' }: DockNavigationProps) {
+    const router = useRouter();
     const navItems = [
         { href: '/home', label: 'Accueil', icon: House },
         { href: '/search', label: 'Recherche', icon: Search },
@@ -15,6 +19,12 @@ export default function DockNavigation({ activePath = '/' }: DockNavigationProps
         { href: '/notifications', label: 'Notifications', icon: Bell },
         { href: '/profil', label: 'Profil', icon: User },
     ];
+
+    const handleLogout = async () => {
+        await fetch('/api/auth/logout', { method: 'POST' });
+        router.push('/welcome');
+        router.refresh(); // Assure la mise à jour de l'état côté client
+    };
 
     return (
         <nav className="bg-white fixed bottom-0 left-0 right-0 shadow-lg z-50 min-[750px]:invisible pb-2" aria-label="Navigation principale">
@@ -48,6 +58,12 @@ export default function DockNavigation({ activePath = '/' }: DockNavigationProps
                         </li>
                     );
                 })}
+                {/* Bouton de déconnexion */}
+                <li>
+                    <button onClick={handleLogout} aria-label="Déconnexion" className="flex items-center p-2">
+                        <LogOut size={28} />
+                    </button>
+                </li>
             </ul>
         </nav>
     );

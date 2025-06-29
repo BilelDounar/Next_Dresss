@@ -8,7 +8,8 @@ const {
     createPublication,
     updatePublication,
     deletePublication,
-    getArticlesByPublication
+    getArticlesByPublication,
+    markPublicationAsViewed
 } = require('../controllers/publicationController');
 
 router
@@ -21,6 +22,8 @@ router
     .get(getPublicationById)
     .put(updatePublication)
     .delete(deletePublication);
+
+router.route('/:id/view').post(markPublicationAsViewed);
 
 router.route('/:id/articles').get(getArticlesByPublication);
 

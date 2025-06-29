@@ -2,7 +2,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import DockNavigationWrapper from "@/app/Components/navigation/DockNavigationWrapper";
+import AppShell from "@/components/layout/AppShell";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -26,10 +26,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fr">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <main className="">{children}</main>
-        <div className="h-[8vh] min-[750px]:h-0"></div>
-        <DockNavigationWrapper />
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased h-screen`}>
+        <main className="h-full">{children}</main>
+        <AppShell />
       </body>
     </html>
   );
