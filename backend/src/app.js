@@ -3,6 +3,9 @@ const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
 
+// Supprimer la ligne suivante car le modèle User n'est plus utilisé dans ce service
+// require('./api/models/userModel');
+
 const app = express();
 
 const publicationRoutes = require('./api/routes/publicationRoutes');

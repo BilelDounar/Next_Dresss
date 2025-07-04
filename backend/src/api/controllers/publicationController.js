@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Publication = require('../models/publicationModel');
 const Article = require('../models/articleModel');
 const ViewedPublication = require('../models/viewedPublicationModel');
@@ -27,23 +28,23 @@ exports.createPublication = async (req, res) => {
 // @route   GET /api/publications
 exports.getPublications = async (req, res) => {
     try {
-        // TODO: Replace with authenticated user ID
         const { userId } = req.query;
         if (!userId) {
-            // If no user ID is provided, return all publications (or handle as an error)
-            const publications = await Publication.find({});
-            return res.status(200).json(publications);
+            // Si aucun userId n'est fourni, on renvoie toutes les publications
+            const allPublications = await Publication.find({});
+            return res.status(200).json(allPublications);
         }
 
-        // Find all publications viewed by the user
-        const viewedPublications = await ViewedPublication.find({ user: userId }).select('publication -_id');
+        // 1. Récupérer les publications vues par cet userId
+        const viewedPublications = await ViewedPublication.find({ user: userId });
         const viewedPublicationIds = viewedPublications.map(vp => vp.publication);
 
-        // Find all publications that are not in the viewed list
+        // 2. Récupérer les publications non vues
         const publications = await Publication.find({ _id: { $nin: viewedPublicationIds } });
 
         res.status(200).json(publications);
     } catch (err) {
+        console.error('Erreur dans getPublications:', err);
         res.status(500).json({ message: err.message });
     }
 };
@@ -93,26 +94,26 @@ exports.deletePublication = async (req, res) => {
 // @route   POST /api/publications/:id/view
 exports.markPublicationAsViewed = async (req, res) => {
     try {
-        // TODO: Replace with authenticated user ID
         const { userId } = req.body;
         const publicationId = req.params.id;
 
         if (!userId) {
-            return res.status(400).json({ message: 'userId is required' });
+            return res.status(400).json({ message: 'userId manquant' });
         }
 
-        // Check if the publication has already been viewed
+        // Vérifier si la publication a déjà été vue par cet utilisateur
         const existingView = await ViewedPublication.findOne({ user: userId, publication: publicationId });
 
         if (existingView) {
-            return res.status(200).json({ message: 'Publication already marked as viewed.' });
+            return res.status(200).json({ message: 'Publication déjà marquée comme vue.' });
         }
 
-        // Create a new entry in ViewedPublication
+        // Créer une nouvelle entrée avec l'ID de l'utilisateur (String)
         await ViewedPublication.create({ user: userId, publication: publicationId });
 
-        res.status(201).json({ message: 'Publication marked as viewed.' });
+        res.status(201).json({ message: 'Publication marquée comme vue.' });
     } catch (error) {
+        console.error('Erreur dans markPublicationAsViewed:', error);
         res.status(500).json({ message: error.message });
     }
 };

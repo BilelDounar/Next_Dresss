@@ -2,8 +2,7 @@ const mongoose = require('mongoose');
 
 const viewedPublicationSchema = new mongoose.Schema({
     user: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
+        type: String, // On stocke l'ID de l'utilisateur (de PostgreSQL) comme une simple chaîne.
         required: true
     },
     publication: {

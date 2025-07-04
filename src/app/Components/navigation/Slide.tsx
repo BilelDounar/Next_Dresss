@@ -2,6 +2,7 @@
 
 // import { Bookmark, Heart, MessageCircle, ExternalLink, Share2 } from "lucide-react";
 import { useEffect, useRef, useState, Fragment } from "react";
+import { useAuth } from "@/hooks/useAuth";
 import HomeBagIcon from "../home/HomeBagIcon";
 import { Dialog, Transition } from "@headlessui/react";
 import AvatarAtom from "@/components/atom/avatar";
@@ -36,6 +37,7 @@ type SlideProps = {
 };
 
 export default function Slide({ publication, id }: SlideProps) {
+    const { user } = useAuth();
     const containerRef = useRef<HTMLDivElement>(null);
     const horizontalRef = useRef<HTMLDivElement>(null);
     const [isVisible, setIsVisible] = useState(false);
@@ -54,17 +56,15 @@ export default function Slide({ publication, id }: SlideProps) {
 
     useEffect(() => {
         const markAsViewed = async () => {
-            if (isVisible && currentPublication) {
+            if (isVisible && currentPublication && user) {
                 try {
-                    // TODO: Replace with the actual authenticated user's ID
-                    const userId = "6671c4a13123282b79c3a25a"; // Hardcoded for demonstration
                     const apiUrl = process.env.NEXT_PUBLIC_API_MONGO;
                     await fetch(`${apiUrl}/api/publications/${currentPublication._id}/view`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
                         },
-                        body: JSON.stringify({ userId }),
+                        body: JSON.stringify({ userId: user.id }),
                     });
                 } catch (error) {
                     console.error("Failed to mark publication as viewed:", error);
@@ -73,7 +73,7 @@ export default function Slide({ publication, id }: SlideProps) {
         };
 
         markAsViewed();
-    }, [isVisible, currentPublication]);
+    }, [isVisible, currentPublication, user]);
 
     useEffect(() => {
         const fetchArticlesForCurrentPublication = async () => {

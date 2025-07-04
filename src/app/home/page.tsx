@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import Slide from "@/app/Components/navigation/Slide";
+import { useAuth } from "@/hooks/useAuth";
 
 // Type pour une publication, correspondant à l'API
 type Publication = {
@@ -12,6 +13,7 @@ type Publication = {
 };
 
 export default function HomePage() {
+    const { user, loading: authLoading, error: authError } = useAuth();
     const [publications, setPublications] = useState<Publication[]>([]);
     const [loading, setLoading] = useState(true);
     const [activeIndex, setActiveIndex] = useState(0);
@@ -20,13 +22,21 @@ export default function HomePage() {
     const slideRefs = useRef<(HTMLDivElement | null)[]>([]);
 
     useEffect(() => {
+        // LOG DE DÉBOGAGE POUR VOIR L'ÉTAT DE L'AUTH
+        console.log('État du hook useAuth:', { user, authLoading, authError });
+
         const fetchPublications = async () => {
+            // Ne rien faire si l'utilisateur n'est pas encore chargé
+            if (!user) {
+                console.log('Appel API annulé : utilisateur non disponible.');
+                return;
+            }
+
             setLoading(true);
             try {
-                // TODO: Replace with the actual authenticated user's ID
-                const userId = "6671c4a13123282b79c3a25a"; // Hardcoded for demonstration
                 const apiUrl = process.env.NEXT_PUBLIC_API_MONGO;
-                const response = await fetch(`${apiUrl}/api/publications?userId=${userId}`);
+                // Utiliser l'ID de l'utilisateur (de PostgreSQL) directement
+                const response = await fetch(`${apiUrl}/api/publications?userId=${user.id}`);
                 if (!response.ok) {
                     throw new Error('La réponse du réseau n\'était pas bonne');
                 }
@@ -40,7 +50,7 @@ export default function HomePage() {
         };
 
         fetchPublications();
-    }, []);
+    }, [user]); // Déclencher l'effet quand l'objet utilisateur change
 
     // Met en place l'Intersection Observer pour la virtualisation
     useEffect(() => {
