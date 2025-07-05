@@ -21,8 +21,12 @@ export const useAuth = () => {
                 }
                 const data: UserSession = await response.json();
                 setUser(data);
-            } catch (err: any) {
-                setError(err.message);
+            } catch (err) {
+                if (err instanceof Error) {
+                    setError(err.message);
+                } else {
+                    setError('Une erreur inconnue est survenue.');
+                }
             } finally {
                 setLoading(false);
             }

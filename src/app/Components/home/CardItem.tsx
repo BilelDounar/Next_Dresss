@@ -1,14 +1,31 @@
 import Button from "@/components/atom/button";
 import { Bookmark } from "lucide-react";
 import { ExternalLink } from "lucide-react";
+import Image from 'next/image';
 
-export default function CardItem({ title, description, price, urlPhoto, openLink }: { title: string, description: string, price: number, urlPhoto: string, openLink: string }) {
+interface CardItemProps {
+    title: string;
+    description: string;
+    price: number;
+    urlPhoto: string;
+    openLink: string;
+}
+
+const CardItem: React.FC<CardItemProps> = ({ title, description, price, urlPhoto, openLink }) => {
 
     return (
         <>
             <div className="flex flex-row gap-x-4">
                 <div className="w-2/5 bg-primary-100 rounded-2xl">
-                    <img src={urlPhoto} alt={`Photo ${title}`} className="w-full h-34 object-cover rounded-2xl" />
+                    <figure className="w-full h-34 relative">
+                        <Image
+                            src={urlPhoto}
+                            alt={`Photo ${title}`}
+                            layout="fill"
+                            objectFit="cover"
+                            className="rounded-2xl"
+                        />
+                    </figure>
                 </div>
 
                 <div className="w-3/5 flex flex-col items-start justify-between">
@@ -21,22 +38,26 @@ export default function CardItem({ title, description, price, urlPhoto, openLink
             </div>
             <div className="flex flex-row w-full gap-x-2">
                 <Button
-                    // onClick={() => setIsModalOpen(true)}
                     variant="default"
                     size="default"
-                    children={<span className="text-base font-semibold">Enregistrer</span>}
-                    iconLeft={<Bookmark className="" />}
-                />
+                    className="text-base font-semibold"
+                >
+                    Enregistrer
+                    <Bookmark className="" />
+                </Button>
                 <Button
-                    // onClick={() => setIsModalOpen(true)}
                     variant="secondary"
                     size="default"
-                    children={<span className="text-base font-semibold ">Consulter</span>}
-                    iconLeft={<ExternalLink className="" />}
+                    className="text-base font-semibold"
                     openLink={openLink}
-                />
+                >
+                    Consulter
+                    <ExternalLink className="" />
+                </Button>
             </div>
             <hr className="w-full border-primary-700" />
         </>
     );
 }
+
+export default CardItem;

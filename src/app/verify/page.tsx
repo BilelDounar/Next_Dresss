@@ -32,6 +32,7 @@ export default function VerifyPage() {
                 if (data.status === 'active' || data.email_verified) {
                     router.push('/home');
                 }
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
             } catch (e) {
                 router.push('/login');
             } finally {
@@ -56,8 +57,12 @@ export default function VerifyPage() {
             }
 
             setResendStatus('sent');
-        } catch (err: any) {
-            setError(err.message);
+        } catch (err) {
+            if (err instanceof Error) {
+                setError(err.message);
+            } else {
+                setError('Une erreur inconnue est survenue.');
+            }
             setResendStatus('error');
         }
     };

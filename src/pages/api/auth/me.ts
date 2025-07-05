@@ -28,11 +28,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             return res.status(404).json({ error: 'User not found' });
         }
 
-        const { password_hash, verification_token, ...userResponse } = user;
+        const { ...userResponse } = user;
 
         return res.status(200).json(userResponse);
-
-    } catch (error) {
+    } catch {
         return res.status(401).json({ error: 'Invalid token' });
     }
 }

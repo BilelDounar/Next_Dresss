@@ -53,6 +53,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         res.setHeader('Set-Cookie', cookie);
 
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { password_hash, verification_token, verification_expires_at, ...userResponse } = user;
 
         return res.status(200).json(userResponse);

@@ -5,5 +5,5 @@ import DockNavigation from './DockNavigation';
 
 export default function DockNavigationWrapper() {
     const pathname = usePathname();
-    return <DockNavigation activePath={pathname} />;
+    return <DockNavigation activePath={pathname ?? undefined} />;
 }

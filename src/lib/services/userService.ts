@@ -12,6 +12,14 @@ export interface NewUser {
     // … autres champs si besoin
 }
 
+export interface User {
+    id: number;
+    email: string;
+    password_hash: string;
+    status: 'pending' | 'active' | 'inactive';
+    email_verified: boolean;
+}
+
 // Vérifie si un email existe (trim + lowercase)
 export async function emailExists(email: string): Promise<boolean> {
     const { rows } = await pool.query<{ exists: boolean }>(
@@ -32,7 +40,7 @@ export async function emailExists(email: string): Promise<boolean> {
  * @param email - L'email de l'utilisateur à récupérer.
  * @returns L'utilisateur trouvé, ou null s'il n'existe pas.
  */
-export async function getUserByEmail(email: string): Promise<any | null> {
+export async function getUserByEmail(email: string): Promise<User | null> {
     const { rows } = await pool.query(
         `
     SELECT id, email, password_hash, status, email_verified

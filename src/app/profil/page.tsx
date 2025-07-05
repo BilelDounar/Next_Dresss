@@ -1,59 +1,64 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import Image from 'next/image';
 import { useAuth } from '@/hooks/useAuth';
-import CardItem from '../Components/home/CardItem';
+// import CardItem from '../Components/home/CardItem';
 import Button from "@/components/atom/button";
 
 // Type pour une publication, correspondant à l'API
-interface Publication {
-    _id: string;
-    description: string;
-    urlsPhotos: string[];
-    user: string;
-}
+// interface Publication {
+//     _id: string;
+//     description: string;
+//     urlsPhotos: string[];
+//     user: string;
+// }
 
 // Interface pour le profil utilisateur complet depuis la base de données
 interface UserProfile {
+    id: number;
+    nom: string;
+    prenom: string;
+    pseudo: string;
+    bio: string | null;
     followersCount: number;
     followingCount: number;
-    // Ajoutez d'autres champs si nécessaire (bio, etc.)
+    // Ajoutez d'autres champs si nécessaire 
 }
 
 export default function ProfilPage() {
     const { user, loading: authLoading } = useAuth();
-    const [publications, setPublications] = useState<Publication[]>([]);
-    const [publicationsLoading, setPublicationsLoading] = useState(true);
+    // const [publications, setPublications] = useState<Publication[]>([]);
+    // const [publicationsLoading, setPublicationsLoading] = useState(true);
     const [userProfile, setUserProfile] = useState<UserProfile | null>(null); // État pour le profil complet
 
+    /*
     useEffect(() => {
         const fetchUserPublications = async () => {
             if (!user) return;
 
-            setPublicationsLoading(true);
-            try {
-                const apiUrl = process.env.NEXT_PUBLIC_API_MONGO;
-                const response = await fetch(`${apiUrl}/api/publications?userId=${user.id}`);
-                if (!response.ok) {
-                    throw new Error("Erreur lors de la récupération des publications");
-                }
-                const data: Publication[] = await response.json();
-                setPublications(Array.isArray(data) ? data : []);
-            } catch (error) {
-                console.error("Impossible de charger les publications:", error);
-                setPublications([]);
-            } finally {
-                setPublicationsLoading(false);
-            }
+            // setPublicationsLoading(true);
+            // try {
+            //     const apiUrl = process.env.NEXT_PUBLIC_API_MONGO;
+            //     const response = await fetch(`${apiUrl}/api/publications?userId=${user.id}`);
+            //     if (!response.ok) {
+            //         throw new Error("Erreur lors de la récupération des publications");
+            //     }
+            //     const data: Publication[] = await response.json();
+            //     // setPublications(Array.isArray(data) ? data : []);
+            // } catch (error) {
+            //     console.error("Impossible de charger les publications:", error);
+            //     // setPublications([]);
+            // } finally {
+            //     // setPublicationsLoading(false);
+            // }
         };
 
         if (user) {
-            fetchUserPublications();
+            // fetchUserPublications();
         }
     }, [user]);
+    */
 
-    // Effet pour récupérer les données complètes de l'utilisateur
     useEffect(() => {
         const fetchUserProfile = async () => {
             if (!user) return;
@@ -112,7 +117,7 @@ export default function ProfilPage() {
                             <p className="text-sm text-gray-600">Followers</p>
                         </div>
                         <div className="text-center">
-                            <p className="font-bold text-lg">{publications.length}</p>
+                            <p className="font-bold text-lg">0</p>
                             <p className="text-sm text-gray-600">Looks</p>
                         </div>
                     </div>
@@ -129,20 +134,24 @@ export default function ProfilPage() {
                 </div>
 
                 {/* Galerie de Looks */}
-                <div className="mt-8">
+                {/* <div className="mt-8">
                     <h2 className="text-xl font-bold mb-4 px-4">Looks</h2>
                     {publicationsLoading ? (
                         <div className="text-center py-4">Chargement des looks...</div>
                     ) : (
                         <div className="grid grid-cols-2 gap-2">
-                            {publications.map(pub => (
-                                pub.urlsPhotos && pub.urlsPhotos.length > 0 && (
-                                    <CardItem key={pub._id} imageUrl={pub.urlsPhotos[0]} />
-                                )
-                            ))}
+                            {publications.length === 0 ? (
+                                <div className="text-center py-4">Aucun look trouvé.</div>
+                            ) : (
+                                publications.map(pub => (
+                                    pub.urlsPhotos && pub.urlsPhotos.length > 0 && (
+                                        <CardItem key={pub._id} imageUrl={pub.urlsPhotos[0]} />
+                                    )
+                                ))
+                            )}
                         </div>
                     )}
-                </div>
+                </div> */}
             </div>
         </div>
     );

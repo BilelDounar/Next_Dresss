@@ -4,6 +4,7 @@
 import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { Input } from "@/components/atom/input";
 import Button from "@/components/atom/button";
 import { ArrowLeftIcon } from "lucide-react";
@@ -64,8 +65,12 @@ export default function RegisterPage() {
                 router.push('/login'); // Fallback
             }
 
-        } catch (err: any) {
-            setError(err.message);
+        } catch (err) {
+            if (err instanceof Error) {
+                setError(err.message);
+            } else {
+                setError('Une erreur inconnue est survenue.');
+            }
         }
     };
 
@@ -74,7 +79,13 @@ export default function RegisterPage() {
             <div className="fixed top-5 left-5">
                 <Button type="button" openLink="/welcome" iconLeft={<ArrowLeftIcon />} size="default" variant="link" className="w-10 h-10 bg-primary-100 rounded-full flex justify-center items-center" />
             </div>
-            <img src="./icons/logo_full_fit.png" className="w-[20vh] mb-8" alt="" />
+            <Image
+                src="./icons/logo_full_fit.png"
+                alt="Logo"
+                width={150}
+                height={50}
+                className="mb-8"
+            />
             <h2 className="text-2xl font-bold font-outfit mb-4 text-center">Inscription</h2>
 
             <form onSubmit={handleSubmit} className="w-full">
@@ -102,9 +113,9 @@ export default function RegisterPage() {
                     <Input type="password" name="password" id="password" placeholder="Mot de passe" required onChange={handleChange} />
                 </div>
 
-                <Button type="submit" className="w-full">S'inscrire</Button>
+                <Button type="submit" className="w-full">S&apos;inscrire</Button>
             </form>
-            <Link href="/login" className="mt-4 text-primary-900 hover:underline">Déjà un compte ? Connectez-vous</Link>
+            <Link href="/login" className="mt-4 text-primary-900 hover:underline">Déjà un compte ? Connectez-vous à la place</Link>
         </div>
     );
 }

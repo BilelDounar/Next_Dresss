@@ -85,7 +85,7 @@ export default function AboutYouPage() {
                 const data = await response.json();
                 setError(data.error || "Une erreur est survenue.");
             }
-        } catch (err) {
+        } catch {
             setError("Une erreur réseau est survenue. Veuillez réessayer.");
         } finally {
             setLoading(false);

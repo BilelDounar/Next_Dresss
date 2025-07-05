@@ -1,9 +1,5 @@
 import { type Meta, type StoryObj } from "@storybook/nextjs-vite";
 import Avatar from "@/components/atom/avatar";
-import { Size } from "@/components/atom/avatar";
-import { fn } from "storybook/test"
-
-const sizeOptions: Size[] = ["sm", "md", "lg"];
 
 const meta = {
     title: "Components/Atom/Avatar",

@@ -34,14 +34,14 @@ const VerifyPage = () => {
                     setStatus('success');
                     setMessage(data.message);
                 }
-            } catch (error) {
+            } catch {
                 setStatus('error');
                 setMessage('Impossible de contacter le serveur. Veuillez réessayer plus tard.');
             }
         };
 
         verifyToken();
-    }, [token]);
+    }, [token, router]);
 
     const handleResendEmail = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -70,15 +70,15 @@ const VerifyPage = () => {
                 setShowResend(false); // Cacher le formulaire après succès
                 setMessage(data.message);
             }
-        } catch (error) {
+        } catch {
             setStatus('error');
             setMessage('Impossible de contacter le serveur pour le renvoi.');
         }
     };
 
     return (
-        <div style={{ fontFamily: 'sans-serif', textAlign: 'center', marginTop: '50px' }}>
-            <h1>Vérification de l'e-mail</h1>
+        <div className="container" style={{ fontFamily: 'sans-serif', textAlign: 'center', marginTop: '50px' }}>
+            <h1>Vérification de l&#39;e-mail</h1>
             <p>{message}</p>
 
             {status === 'success' && !showResend && (
@@ -99,10 +99,14 @@ const VerifyPage = () => {
                         style={{ padding: '8px', marginRight: '10px' }}
                     />
                     <button type="submit" disabled={status === 'loading'} style={{ padding: '8px 12px' }}>
-                        {status === 'loading' ? 'Envoi...' : 'Renvoyer l\'e-mail'}
+                        {status === 'loading' ? 'Envoi...' : 'Renvoyer l&#39;e-mail'}
                     </button>
                 </form>
             )}
+            <p>
+                Si vous n&apos;avez pas reçu l&apos;e-mail, veuillez vérifier votre dossier de spam ou
+                cliquez sur le bouton ci-dessous pour renvoyer l&apos;e-mail de vérification.
+            </p>
         </div>
     );
 };

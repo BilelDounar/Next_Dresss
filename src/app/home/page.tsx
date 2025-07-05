@@ -28,7 +28,10 @@ export default function HomePage() {
         if (!authLoading && user && user.status === 'pending') {
             router.push('/about-you');
         }
-    }, [user, authLoading, router]);
+        if (authError) {
+            router.push('/login');
+        }
+    }, [user, authLoading, authError, router]);
 
     useEffect(() => {
         // LOG DE DÉBOGAGE POUR VOIR L'ÉTAT DE L'AUTH
@@ -60,11 +63,14 @@ export default function HomePage() {
             }
         };
 
-        fetchPublications();
-    }, [user]); // Déclencher l'effet quand l'objet utilisateur change
+        if (user && !authLoading && !authError) {
+            fetchPublications();
+        }
+    }, [user, authLoading, authError]);
 
-    // Met en place l'Intersection Observer pour la virtualisation
     useEffect(() => {
+        const currentSlideRefs = slideRefs.current;
+
         if (publications.length === 0 || !window.IntersectionObserver) return;
 
         observer.current = new IntersectionObserver(
@@ -79,14 +85,13 @@ export default function HomePage() {
             { threshold: 0.6 } // Un slide est actif si 60% est visible
         );
 
-        const currentObserver = observer.current;
-        slideRefs.current.forEach((ref) => {
-            if (ref) currentObserver.observe(ref);
+        Object.values(currentSlideRefs).forEach((ref) => {
+            if (ref) observer.current?.observe(ref);
         });
 
         return () => {
-            slideRefs.current.forEach((ref) => {
-                if (ref && currentObserver) currentObserver.unobserve(ref);
+            Object.values(currentSlideRefs).forEach((ref) => {
+                if (ref && observer.current) observer.current.unobserve(ref);
             });
         };
     }, [publications]);
@@ -121,7 +126,7 @@ export default function HomePage() {
                                     className="snap-start w-full h-[92vh] min-[750px]:h-screen" // Conteneur pour l'observer
                                 >
                                     {isVisible ? (
-                                        <Slide publication={publication} id={index} />
+                                        <Slide publication={publication} />
                                     ) : (
                                         <div className="w-full h-full" /> // Placeholder pour les slides non visibles
                                     )}

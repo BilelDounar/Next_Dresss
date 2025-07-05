@@ -1,19 +1,18 @@
 "use client";
 
-// import { Bookmark, Heart, MessageCircle, ExternalLink, Share2 } from "lucide-react";
 import { useEffect, useRef, useState, Fragment } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import HomeBagIcon from "../home/HomeBagIcon";
-import { Dialog, Transition } from "@headlessui/react";
-import AvatarAtom from "@/components/atom/avatar";
-import Button from "@/components/atom/button";
+import { Transition } from '@headlessui/react'
 import CardItem from "../home/CardItem";
 import ActionButton from "../home/ActionButton";
 import { BookmarkIcon, CommentIcon, HeartIcon, ShareIcon } from "../home/ActionIconSVG";
+import Image from 'next/image';
+import Avatar from "@/components/atom/avatar";
 
 // Type pour un article
 type Article = {
-    _id: string; 
+    _id: string;
     titre: string;
     description: string;
     prix: number;
@@ -33,10 +32,9 @@ type Publication = {
 // Type pour les props du composant Slide
 type SlideProps = {
     publication: Publication;
-    id: number; 
 };
 
-export default function Slide({ publication, id }: SlideProps) {
+export default function Slide({ publication }: SlideProps) {
     const { user } = useAuth();
     const containerRef = useRef<HTMLDivElement>(null);
     const horizontalRef = useRef<HTMLDivElement>(null);
@@ -116,9 +114,11 @@ export default function Slide({ publication, id }: SlideProps) {
             { threshold: 0.7 }
         );
 
-        if (containerRef.current) observer.observe(containerRef.current);
+        const node = containerRef.current;
+        if (node) observer.observe(node);
+
         return () => {
-            if (containerRef.current) observer.unobserve(containerRef.current);
+            if (node) observer.unobserve(node);
         };
     }, []);
 
@@ -270,10 +270,12 @@ export default function Slide({ publication, id }: SlideProps) {
                         className="snap-start w-full h-full flex-shrink-0 flex items-center justify-center bg-primary-300" // Assure un fond noir pour l'image
                         style={{ minWidth: "100%" }}
                     >
-                        <img
+                        <Image
                             src={url}
                             alt={`Photo ${idx + 1} de la publication`}
-                            className="w-full h-full object-contain" // Affiche l'image entière
+                            width={500}
+                            height={300}
+                            objectFit="cover"
                         />
                     </div>
                 ))}
@@ -291,7 +293,7 @@ export default function Slide({ publication, id }: SlideProps) {
             {currentPublication && (
                 <div className="absolute bottom-4 px-4 w-full flex justify-between items-center">
                     <div className="flex flex-row gap-4">
-                        <AvatarAtom src="https://avatars.githubusercontent.com/u/105309377?v=4" alt="BD" size="md" isFollowed={false} onClick={() => console.log("clicked")} />
+                        <Avatar src="https://avatars.githubusercontent.com/u/105309377?v=4" alt="BD" size="md" isFollowed={false} onClick={() => console.log("clicked")} />
                         <div>
                             <h2 className="text-white font-bold text-lg truncate w-full max-w-[140px] min-[500px]:max-w-[250px] min-[600px]:max-w-[400px] min-[749px]:max-w-[500px] min-[750px]:max-w-[0]">
                                 {currentPublication._id}

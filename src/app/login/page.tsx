@@ -4,6 +4,7 @@
 import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image"; // Importer le composant Image
 import { Input } from "@/components/atom/input";
 import Button from "@/components/atom/button";
 import { ArrowLeftIcon } from "lucide-react";
@@ -45,8 +46,13 @@ export default function LoginPage() {
             }
             router.refresh();
 
-        } catch (err: any) {
-            setError(err.message);
+        } catch (err) {
+            // Remplacer 'any' par un type plus spécifique
+            if (err instanceof Error) {
+                setError(err.message);
+            } else {
+                setError('Une erreur inconnue est survenue.');
+            }
         }
     };
 
@@ -55,7 +61,13 @@ export default function LoginPage() {
             <div className="fixed top-5 left-5">
                 <Button type="button" openLink="/welcome" iconLeft={<ArrowLeftIcon />} size="default" variant="link" className="w-10 h-10 bg-primary-100 rounded-full flex justify-center items-center" />
             </div>
-            <img src="./icons/logo_full_fit.png" className="w-[20vh] mb-8" alt="" />
+            <Image
+                src="./icons/logo_full_fit.png"
+                alt="Logo"
+                width={200}
+                height={200}
+                objectFit="cover"
+            />
             <h2 className="text-2xl font-bold font-outfit mb-4 text-center">Connexion</h2>
 
             <form onSubmit={handleSubmit} className="w-full">
