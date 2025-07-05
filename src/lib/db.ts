@@ -2,7 +2,7 @@
 import { Pool } from 'pg';
 
 if (!process.env.DATABASE_URL) {
-    throw new Error("🚨 Veuillez définir DATABASE_URL dans .env.local");
+    throw new Error("Définir DATABASE_URL dans .env");
 }
 
 export const pool = new Pool({
@@ -14,6 +14,6 @@ export const pool = new Pool({
 });
 
 pool.on("error", (err) => {
-    console.error("Erreur inattendue sur le client pg :", err);
+    console.error("Erreur sur le client pg :", err);
     process.exit(-1);
 });

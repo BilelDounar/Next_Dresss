@@ -16,36 +16,24 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(405).json({ error: 'Méthode non autorisée' });
     }
 
-    console.log("\n--- Début de la requête de connexion ---");
-
     try {
         const { email, password } = loginSchema.parse(req.body);
-        console.log(`[1] Tentative de connexion pour l'email: ${email}`);
 
         const user = await getUserByEmail(email);
         if (!user) {
-            console.log("[ERREUR] Aucun utilisateur trouvé avec cet email.");
             return res.status(404).json({ error: 'Aucun utilisateur trouvé avec cet email.' });
         }
 
-        console.log("[2] Utilisateur trouvé dans la BDD:", { id: user.id, email: user.email, status: user.status });
-        console.log(`[3] Hash du mot de passe depuis la BDD (longueur): ${user.password_hash ? user.password_hash.length : 'null'}`);
-
-        console.log("[4] Comparaison des mots de passe en cours...");
         const isPasswordValid = await bcrypt.compare(password, user.password_hash);
-        console.log(`[5] Résultat de la comparaison (isPasswordValid): ${isPasswordValid}`);
 
         if (!isPasswordValid) {
-            console.log("[ERREUR] La comparaison des mots de passe a échoué.");
             return res.status(401).json({ error: 'Mot de passe incorrect.' });
         }
-
-        console.log("[6] Connexion réussie. Création du token JWT...");
 
         // Créer le token JWT
         const token = jwt.sign(
             {
-                userId: user.id,
+                id: user.id,
                 email: user.email,
                 status: user.status,
                 email_verified: user.email_verified
@@ -53,8 +41,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             process.env.JWT_SECRET as string,
             { expiresIn: '7d' } // Le token expire dans 7 jours
         );
-
-        console.log("[7] Token JWT créé avec succès.");
 
         // Définir le cookie
         const cookie = serialize('auth_token', token, {
@@ -65,13 +51,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             path: '/',
         });
 
-        console.log("[8] Cookie défini avec succès.");
-
         res.setHeader('Set-Cookie', cookie);
 
         const { password_hash, verification_token, verification_expires_at, ...userResponse } = user;
-
-        console.log("[9] Réponse utilisateur préparée.");
 
         return res.status(200).json(userResponse);
 

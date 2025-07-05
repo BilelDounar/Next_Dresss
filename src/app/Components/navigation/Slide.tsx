@@ -13,7 +13,7 @@ import { BookmarkIcon, CommentIcon, HeartIcon, ShareIcon } from "../home/ActionI
 
 // Type pour un article
 type Article = {
-    _id: string; // Utiliser _id qui vient de MongoDB
+    _id: string; 
     titre: string;
     description: string;
     prix: number;
@@ -33,7 +33,7 @@ type Publication = {
 // Type pour les props du composant Slide
 type SlideProps = {
     publication: Publication;
-    id: number; // Gardé pour le style de fond
+    id: number; 
 };
 
 export default function Slide({ publication, id }: SlideProps) {

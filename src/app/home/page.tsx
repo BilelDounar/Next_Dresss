@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
+import { useRouter } from 'next/navigation';
 import Slide from "@/app/Components/navigation/Slide";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -14,12 +15,20 @@ type Publication = {
 
 export default function HomePage() {
     const { user, loading: authLoading, error: authError } = useAuth();
+    const router = useRouter();
     const [publications, setPublications] = useState<Publication[]>([]);
     const [loading, setLoading] = useState(true);
     const [activeIndex, setActiveIndex] = useState(0);
 
     const observer = useRef<IntersectionObserver | null>(null);
     const slideRefs = useRef<(HTMLDivElement | null)[]>([]);
+    
+    useEffect(() => {
+        // Redirection si l'utilisateur a le statut 'pending'
+        if (!authLoading && user && user.status === 'pending') {
+            router.push('/about-you');
+        }
+    }, [user, authLoading, router]);
 
     useEffect(() => {
         // LOG DE DÉBOGAGE POUR VOIR L'ÉTAT DE L'AUTH
@@ -31,6 +40,8 @@ export default function HomePage() {
                 console.log('Appel API annulé : utilisateur non disponible.');
                 return;
             }
+            // Ne pas lancer la récupération si l'utilisateur va être redirigé
+            if (user.status === 'pending') return;
 
             setLoading(true);
             try {
@@ -80,6 +91,15 @@ export default function HomePage() {
         };
     }, [publications]);
 
+    // Affiche un état de chargement si l'authentification est en cours ou si l'utilisateur va être redirigé
+    if (authLoading || (user && user.status === 'pending')) {
+        return (
+            <div className="h-screen flex items-center justify-center">
+                <p>Chargement...</p>
+            </div>
+        );
+    }
+
     return (
         <div className="flex flex-row">
             <div className="snap-y snap-mandatory overflow-y-scroll h-[92vh] w-full min-[750px]:max-w-[500px] min-[750px]:h-screen min-[750px]:w-screen bg-primary-300">
@@ -88,25 +108,31 @@ export default function HomePage() {
                         <p className="fixed top-[40%] right-[40%] text-white">Chargement...</p>
                     </div>
                 ) : (
-                    publications.map((publication, index) => {
-                        // Affiche le slide s'il est actif, ou celui d'avant/après
-                        const isVisible = Math.abs(index - activeIndex) <= 1;
+                    publications.length > 0 ? (
+                        publications.map((publication, index) => {
+                            // Affiche le slide s'il est actif, ou celui d'avant/après
+                            const isVisible = Math.abs(index - activeIndex) <= 1;
 
-                        return (
-                            <div
-                                key={publication._id}
-                                ref={(el) => (slideRefs.current[index] = el)}
-                                data-index={index}
-                                className="snap-start w-full h-[92vh] min-[750px]:h-screen" // Conteneur pour l'observer
-                            >
-                                {isVisible ? (
-                                    <Slide publication={publication} id={index} />
-                                ) : (
-                                    <div className="w-full h-full" /> // Placeholder pour les slides non visibles
-                                )}
-                            </div>
-                        );
-                    })
+                            return (
+                                <div
+                                    key={publication._id}
+                                    ref={(el) => (slideRefs.current[index] = el)}
+                                    data-index={index}
+                                    className="snap-start w-full h-[92vh] min-[750px]:h-screen" // Conteneur pour l'observer
+                                >
+                                    {isVisible ? (
+                                        <Slide publication={publication} id={index} />
+                                    ) : (
+                                        <div className="w-full h-full" /> // Placeholder pour les slides non visibles
+                                    )}
+                                </div>
+                            );
+                        })
+                    ) : (
+                        <p className="snap-start h-[92vh] min-[750px]:h-screen flex items-center justify-center">
+                            Aucune publication trouvée.
+                        </p>
+                    )
                 )}
             </div>
 

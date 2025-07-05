@@ -3,9 +3,6 @@ const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
 
-// Supprimer la ligne suivante car le modèle User n'est plus utilisé dans ce service
-// require('./api/models/userModel');
-
 const app = express();
 
 const publicationRoutes = require('./api/routes/publicationRoutes');
@@ -37,9 +34,6 @@ app.use('/api/publications', publicationRoutes);
 app.get('/', (req, res) => {
     res.status(200).json({ message: 'API is running successfully!' });
 });
-
-// Ici, vous ajouterez les routes de votre API
-// Exemple : app.use('/api/users', require('./api/routes/userRoutes'));
 
 // --- Gestion des erreurs ---
 

@@ -40,7 +40,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         // 5) Générer le token JWT
         const token = jwt.sign(
             {
-                userId: newUser.id,
+                id: newUser.id,
                 status: newUser.status, // Sera 'pending' par défaut
                 email_verified: newUser.email_verified,
             },
