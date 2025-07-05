@@ -22,7 +22,7 @@ export default function HomePage() {
 
     const observer = useRef<IntersectionObserver | null>(null);
     const slideRefs = useRef<(HTMLDivElement | null)[]>([]);
-    
+
     useEffect(() => {
         // Redirection si l'utilisateur a le statut 'pending'
         if (!authLoading && user && user.status === 'pending') {
@@ -116,7 +116,7 @@ export default function HomePage() {
                             return (
                                 <div
                                     key={publication._id}
-                                    ref={(el) => (slideRefs.current[index] = el)}
+                                    ref={(el) => { slideRefs.current[index] = el; }}
                                     data-index={index}
                                     className="snap-start w-full h-[92vh] min-[750px]:h-screen" // Conteneur pour l'observer
                                 >

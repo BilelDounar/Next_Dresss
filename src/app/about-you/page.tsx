@@ -1,12 +1,13 @@
 // src/app/about-you/page.tsx
 "use client";
 
-import { useState, FormEvent } from "react";
+import { useEffect, useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Button from "@/components/atom/button";
 import { Input } from "@/components/atom/input";
 import { Select, SelectItem, SelectTrigger, SelectValue, SelectContent } from "@/components/atom/select";
 import { MultiSelect } from "@/components/atom/multi-select";
+import { useAuth } from "@/hooks/useAuth";
 
 const styleOptions = [
     { value: "streetwear", label: "Streetwear" },
@@ -21,6 +22,18 @@ const styleOptions = [
 
 export default function AboutYouPage() {
     const router = useRouter();
+    const { user, loading: authLoading } = useAuth();
+
+    useEffect(() => {
+        if (!authLoading && user) {
+            if (user.status === 'active') {
+                router.push('/home');
+            } else if (user.status === 'disabled') {
+                router.push('/welcome');
+            }
+        }
+    }, [user, authLoading, router]);
+
     const [formData, setFormData] = useState({
         genre: "",
         dateOfBirth: "",
@@ -47,7 +60,6 @@ export default function AboutYouPage() {
         setLoading(true);
         setError(null);
 
-        // Validation simple côté client
         if (!formData.genre || !formData.dateOfBirth || formData.preferredStyles.length === 0) {
             setError("Veuillez remplir tous les champs.");
             setLoading(false);
@@ -68,7 +80,6 @@ export default function AboutYouPage() {
             });
 
             if (response.ok) {
-                // Redirection vers la page d'accueil en cas de succès
                 router.push('/home');
             } else {
                 const data = await response.json();
