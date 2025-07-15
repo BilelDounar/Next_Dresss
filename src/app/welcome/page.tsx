@@ -8,7 +8,7 @@ export default function RegisterPage() {
     return (
         <div className="flex flex-col h-full items-center">
             <Image
-                src="./photo/welcome_bg.jpg"
+                src="/photo/welcome_bg.jpg"
                 alt="Background"
                 width={1920}
                 height={1080}
