@@ -7,9 +7,8 @@ const meta = {
     args: {
         size: "md",
         isFollowed: true,
-        // src: "https://avatars.githubusercontent.com/u/105309377?v=4",
         alt: "BD",
-        onClick: fn(),
+        onClick: () => {},
     },
     argTypes: {
         size: {
