@@ -62,7 +62,7 @@ export default function LoginPage() {
                 <Button type="button" openLink="/welcome" iconLeft={<ArrowLeftIcon />} size="default" variant="link" className="w-10 h-10 bg-primary-100 rounded-full flex justify-center items-center" />
             </div>
             <Image
-                src="./icons/logo_full_fit.png"
+                src="/icons/logo_full_fit.png"
                 alt="Logo"
                 width={200}
                 height={200}

@@ -64,6 +64,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             return res.status(400).json({ error: error.errors.map(e => e.message).join(', ') });
         }
         console.error('Login error:', error);
+        if (error instanceof Error) {
+            console.error('Erreur 500 détaillée :', error.message, error.stack); // Affiche l'erreur détaillée dans la console serveur
+        } else {
+            console.error('Erreur 500 détaillée :', error);
+        }
         return res.status(500).json({ error: 'Erreur interne du serveur.' });
     }
 }
