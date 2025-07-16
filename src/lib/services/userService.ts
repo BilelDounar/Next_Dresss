@@ -118,7 +118,7 @@ export async function resetVerificationToken(userId: string): Promise<string | n
         return null; // Utilisateur non trouvé
     }
 
-    const { email } = rows[0];
+    // const { email } = rows[0];
 
     // Envoi de l'e-mail de vérification
     // await sendVerificationEmail(email, verificationToken);
