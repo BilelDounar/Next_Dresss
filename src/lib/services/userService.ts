@@ -1,7 +1,7 @@
 // lib/services/userService.ts
 import { pool } from "../db";
 import crypto from "crypto";
-// import { sendVerificationEmail } from "./mailService";
+import { sendVerificationEmail } from "./mailService";
 
 export interface NewUser {
     nom: string;
@@ -31,21 +31,6 @@ export async function emailExists(email: string): Promise<boolean> {
     ) AS exists
     `,
         [email]
-    );
-    return rows[0].exists;
-}
-
-// Vérifie si un pseudo existe (trim + lowercase)
-export async function pseudoExists(pseudo: string): Promise<boolean> {
-    const { rows } = await pool.query<{ exists: boolean }>(
-        `
-    SELECT EXISTS(
-      SELECT 1
-      FROM public.users
-      WHERE LOWER(TRIM(pseudo)) = LOWER(TRIM($1))
-    ) AS exists
-    `,
-        [pseudo]
     );
     return rows[0].exists;
 }
@@ -86,8 +71,8 @@ export async function createUser(data: NewUser) {
         [nom, prenom, pseudo, email.trim(), password_hash, "user", "pending", false, 0, 0, verificationToken, verificationExpiresAt, "fr"]
     );
 
-    // Envoi de l'e-mail de vérification
-    // await sendVerificationEmail(rows[0].email, verificationToken);
+    // Envoyer l'e-mail de vérification
+    await sendVerificationEmail(rows[0].email, verificationToken);
 
     return rows[0];
 }
@@ -118,10 +103,10 @@ export async function resetVerificationToken(userId: string): Promise<string | n
         return null; // Utilisateur non trouvé
     }
 
-    // const { email } = rows[0];
+    const { email } = rows[0];
 
-    // Envoi de l'e-mail de vérification
-    // await sendVerificationEmail(email, verificationToken);
+    // Renvoyer l'e-mail de vérification
+    await sendVerificationEmail(email, verificationToken);
 
     return verificationToken;
 }
