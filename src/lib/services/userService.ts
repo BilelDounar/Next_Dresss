@@ -1,7 +1,7 @@
 // lib/services/userService.ts
 import { pool } from "../db";
 import crypto from "crypto";
-import { sendVerificationEmail } from "./mailService";
+// import { sendVerificationEmail } from "./mailService";
 
 export interface NewUser {
     nom: string;
