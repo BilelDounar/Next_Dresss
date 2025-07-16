@@ -248,7 +248,7 @@ export default function Slide({ publication }: SlideProps) {
             ref={containerRef}
             className="w-full h-[90vh] min-[750px]:min-[600px]:h-screen flex flex-col relative bg-primary-300" // Taille contrôlée par le parent, fond noir
         >
-            <div className="absolute bottom-36 right-4 flex flex-col justify-center items-center gap-y-5">
+            <div className="absolute bottom-36 right-4 flex flex-col justify-center items-center gap-y-5 z-10">
                 {actions.map(({ icon, count, onClick }, index) => (
                     <ActionButton
                         key={index}
@@ -267,21 +267,20 @@ export default function Slide({ publication }: SlideProps) {
                 {currentPublication?.urlsPhotos?.map((url, idx) => (
                     <div
                         key={`${currentPublication._id}-${idx}`}
-                        className="snap-start w-full h-full flex-shrink-0 flex items-center justify-center bg-primary-300" // Assure un fond noir pour l'image
+                        className="snap-start w-full h-full flex-shrink-0 relative flex items-center justify-center bg-primary-300" // Assure un fond noir pour l'image
                         style={{ minWidth: "100%" }}
                     >
                         <Image
                             src={url}
                             alt={`Photo ${idx + 1} de la publication`}
-                            width={500}
-                            height={300}
-                            objectFit="cover"
+                            fill
+                            className="object-cover"
                         />
                     </div>
                 ))}
             </div>
 
-            <div className="absolute bottom-22 left-1/2 transform -translate-x-1/2 flex gap-2">
+            <div className="absolute bottom-22 left-1/2 transform -translate-x-1/2 flex gap-2 z-10">
                 {dotIndices().map((idx) => (
                     <span
                         key={idx}
@@ -291,7 +290,7 @@ export default function Slide({ publication }: SlideProps) {
             </div>
 
             {currentPublication && (
-                <div className="absolute bottom-4 px-4 w-full flex justify-between items-center">
+                <div className="absolute bottom-4 px-4 w-full flex justify-between items-center z-10">
                     <div className="flex flex-row gap-4">
                         <Avatar src="https://avatars.githubusercontent.com/u/105309377?v=4" alt="BD" size="md" isFollowed={false} onClick={() => console.log("clicked")} />
                         <div>

@@ -1,6 +1,6 @@
 // pages/api/auth/register.ts
 import type { NextApiRequest, NextApiResponse } from "next";
-import { emailExists, createUser } from "@/lib/services/userService";
+import { emailExists, pseudoExists, createUser } from "@/lib/services/userService";
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { serialize } from 'cookie';
@@ -29,15 +29,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             return res.status(409).json({ error: "Cet email est déjà utilisé" });
         }
 
-        // 3) Hasher le mot de passe
+        // 3) Vérifier si le pseudo existe déjà
+        if (await pseudoExists(pseudo)) {
+            return res.status(409).json({ error: "Ce pseudo est déjà utilisé" });
+        }
+
+        // 4) Hasher le mot de passe
         const password_hash = await bcrypt.hash(password, 10);
 
-        // 4) Créer l’utilisateur
+        // 5) Créer l’utilisateur
         const newUser = await createUser({
             nom, prenom, pseudo, email, password_hash
         });
 
-        // 5) Générer le token JWT
+        // 6) Générer le token JWT
         const token = jwt.sign(
             {
                 id: newUser.id,
@@ -48,7 +53,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             { expiresIn: '7d' }
         );
 
-        // 6) Définir le cookie d'authentification
+        // 7) Définir le cookie d'authentification
         const cookie = serialize('auth_token', token, {
             httpOnly: true,
             secure: process.env.NODE_ENV !== 'development',
@@ -59,7 +64,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         res.setHeader('Set-Cookie', cookie);
 
-        // 7) Renvoyer la réponse au client
+        // 8) Renvoyer la réponse au client
         return res.status(201).json({
             id: newUser.id,
             email: newUser.email,

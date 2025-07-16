@@ -35,6 +35,21 @@ export async function emailExists(email: string): Promise<boolean> {
     return rows[0].exists;
 }
 
+// Vérifie si un pseudo existe (trim + lowercase)
+export async function pseudoExists(pseudo: string): Promise<boolean> {
+    const { rows } = await pool.query<{ exists: boolean }>(
+        `
+    SELECT EXISTS(
+      SELECT 1
+      FROM public.users
+      WHERE LOWER(TRIM(pseudo)) = LOWER(TRIM($1))
+    ) AS exists
+    `,
+        [pseudo]
+    );
+    return rows[0].exists;
+}
+
 /**
  * Récupère un utilisateur par son email.
  * @param email - L'email de l'utilisateur à récupérer.
@@ -65,10 +80,10 @@ export async function createUser(data: NewUser) {
         `
     INSERT INTO public.users(
         nom, prenom, pseudo, email, password_hash, role, status, email_verified, followers_count, posts_count, verification_token, verification_expires_at, language, created_at, updated_at
-    ) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, NOW(), NOW())
-    RETURNING id, nom, prenom, pseudo, email, email_verified
+    ) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, NOW(), NOW())
+    RETURNING id, nom, prenom, pseudo, email, email_verified, status
     `,
-        [nom, prenom, pseudo, email.trim(), password_hash, "user", "pending", false, 0, 0, verificationToken, verificationExpiresAt, "fr",]
+        [nom, prenom, pseudo, email.trim(), password_hash, "user", "pending", false, 0, 0, verificationToken, verificationExpiresAt, "fr"]
     );
 
     // Envoyer l'e-mail de vérification
