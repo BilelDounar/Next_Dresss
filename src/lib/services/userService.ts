@@ -86,8 +86,8 @@ export async function createUser(data: NewUser) {
         [nom, prenom, pseudo, email.trim(), password_hash, "user", "pending", false, 0, 0, verificationToken, verificationExpiresAt, "fr"]
     );
 
-    // Envoyer l'e-mail de vérification
-    await sendVerificationEmail(rows[0].email, verificationToken);
+    // Envoi de l'e-mail de vérification
+    // await sendVerificationEmail(rows[0].email, verificationToken);
 
     return rows[0];
 }
@@ -120,8 +120,8 @@ export async function resetVerificationToken(userId: string): Promise<string | n
 
     const { email } = rows[0];
 
-    // Renvoyer l'e-mail de vérification
-    await sendVerificationEmail(email, verificationToken);
+    // Envoi de l'e-mail de vérification
+    // await sendVerificationEmail(email, verificationToken);
 
     return verificationToken;
 }
