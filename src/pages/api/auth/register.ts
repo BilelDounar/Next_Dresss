@@ -71,7 +71,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         if (error instanceof z.ZodError) {
             return res.status(400).json({ error: error.errors.map(e => e.message).join(', ') });
         }
-        console.error("API /auth/register error:", error);
-        return res.status(500).json({ error: "Erreur interne du serveur" });
+        console.error("Heure:", new Date().toISOString());
+        console.error("Requête:", req.body);
+        console.error("Erreur:", error);
+        console.error("--- FIN ERREUR API INSCRIPTION ---\n");
+
+        // Toujours renvoyer l'erreur détaillée pour le débogage
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        return res.status(500).json({ error: `Erreur interne du serveur: ${errorMessage}` });
     }
 }

@@ -27,7 +27,7 @@ export default function RootLayout({
   return (
     <html lang="fr">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased h-screen`}>
-        <main className="h-full">{children}</main>
+        <main className="h-full overflow-y-hidden">{children}</main>
         <AppShell />
       </body>
     </html>

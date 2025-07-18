@@ -64,11 +64,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             return res.status(400).json({ error: error.errors.map(e => e.message).join(', ') });
         }
         console.error('Login error:', error);
-        if (error instanceof Error) {
-            console.error('Erreur 500 détaillée :', error.message, error.stack); // Affiche l'erreur détaillée dans la console serveur
-        } else {
-            console.error('Erreur 500 détaillée :', error);
-        }
-        return res.status(500).json({ error: 'Erreur interne du serveur.' });
+        console.error("Email de la tentative:", req.body?.email);
+        console.error("Erreur:", error);
+        console.error("--- FIN ERREUR API CONNEXION ---\n");
+
+        // Toujours renvoyer l'erreur détaillée pour le débogage
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        return res.status(500).json({ error: `Erreur interne du serveur: ${errorMessage}` });
     }
 }

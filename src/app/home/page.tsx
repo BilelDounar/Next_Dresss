@@ -29,7 +29,7 @@ export default function HomePage() {
             router.push('/about-you');
         }
         if (authError) {
-            router.push('/login');
+            router.push('/welcome');
         }
     }, [user, authLoading, authError, router]);
 

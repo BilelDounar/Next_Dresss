@@ -25,7 +25,7 @@ export default function RegisterPage() {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
-    const handleSubmit = async (e: FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setError(null);
         setSuccess(null);
@@ -40,42 +40,25 @@ export default function RegisterPage() {
             const data = await response.json();
 
             if (!response.ok) {
-                // Gérer les erreurs de validation de Zod ou autres erreurs
-                let errorMessage = data.error || "Une erreur est survenue.";
-                if (data.details) {
-                    const details = Object.values(data.details).flat().join(' ');
-                    errorMessage += ` ${details}`;
-                }
-                throw new Error(errorMessage);
+                setError(data.error || "Une erreur inconnue est survenue.");
+                return;
             }
 
-            setSuccess("Inscription réussie ! Veuillez consulter vos emails pour vérifier votre compte.");
-
-            // // Rediriger vers la page de vérification après un court délai
-            // setTimeout(() => {
-            //     router.push('/verify');
-            // }, 2000);
-
-            // Redirection en fonction du statut
+            setSuccess("Inscription réussie !");
             if (data.status === 'pending') {
                 router.push('/about-you');
-            } else if (data.status === 'active') {
-                router.push('/home');
             } else {
-                router.push('/login'); // Fallback
+                router.push('/home');
             }
 
         } catch (err) {
-            if (err instanceof Error) {
-                setError(err.message);
-            } else {
-                setError('Une erreur inconnue est survenue.');
-            }
+            console.error("Erreur réseau ou de parsing JSON:", err);
+            setError("Impossible de contacter le serveur. Veuillez vérifier votre connexion.");
         }
     };
 
     return (
-        <div className="flex flex-col h-screen items-center p-8 pt-25">
+        <div className="flex flex-col min-h-screen items-center p-8 pt-25">
             <div className="fixed top-5 left-5">
                 <Button type="button" openLink="/welcome" iconLeft={<ArrowLeftIcon />} size="default" variant="link" className="w-10 h-10 bg-primary-100 rounded-full flex justify-center items-center" />
             </div>
@@ -89,8 +72,12 @@ export default function RegisterPage() {
             <h2 className="text-2xl font-bold font-outfit mb-4 text-center">Inscription</h2>
 
             <form onSubmit={handleSubmit} className="w-full">
-                {error && <p className="text-red-500 mb-2">{error}</p>}
-                {success && <p className="text-green-500 mb-2">{success}</p>}
+                {error && (
+                    <div className="mb-4 text-left text-sm text-red-600 bg-red-100 border border-red-400 rounded-md p-3 whitespace-pre-wrap">
+                        <strong>Erreur :</strong> {error}
+                    </div>
+                )}
+                {success && <p className="text-green-500 mb-2 text-center">{success}</p>}
 
                 <div className="mb-4">
                     <label htmlFor="nom" className="block text-sm font-medium text-gray-700">Nom</label>
