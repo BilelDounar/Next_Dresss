@@ -56,7 +56,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { password_hash, ...userResponse } = user;
 
-        return res.status(200).json(userResponse);
+        return res.status(200).json({
+            message: "Connexion réussie",
+            user: {
+                id: userResponse.id,
+                status: userResponse.status,
+                email: userResponse.email
+            }
+        });
 
     } catch (error) {
         console.log("[ERREUR] Une erreur s'est produite pendant la connexion.");

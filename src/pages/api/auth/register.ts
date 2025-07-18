@@ -59,12 +59,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         res.setHeader('Set-Cookie', cookie);
 
-        // 7) Renvoyer la réponse au client
+        // Envoyer le cookie
+        // setTokenCookie(res, token);
+
+        // Répondre avec le statut de l'utilisateur pour la redirection
         return res.status(201).json({
-            id: newUser.id,
-            email: newUser.email,
+            message: "Utilisateur créé avec succès",
             status: newUser.status,
-            email_verified: newUser.email_verified,
+            userId: newUser.id
         });
 
     } catch (error) {
