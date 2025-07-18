@@ -29,7 +29,7 @@ export default function VerifyPage() {
                 const data: UserSession = await res.json();
                 setUser(data);
 
-                if (data.status === 'active' || data.email_verified) {
+                if (data.email_verified) {
                     router.push('/home');
                 }
                 // eslint-disable-next-line @typescript-eslint/no-unused-vars

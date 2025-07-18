@@ -24,6 +24,10 @@ export default function HomePage() {
     const slideRefs = useRef<(HTMLDivElement | null)[]>([]);
 
     useEffect(() => {
+        // Redirection si l'utilisateur n'a pas vérifié son email
+        if (!authLoading && user && !user.email_verified) {
+            router.push('/verify');
+        }
         // Redirection si l'utilisateur a le statut 'pending'
         if (!authLoading && user && user.status === 'pending') {
             router.push('/about-you');
