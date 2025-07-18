@@ -110,3 +110,21 @@ export async function resetVerificationToken(userId: string): Promise<string | n
 
     return verificationToken;
 }
+
+/**
+ * Récupère le pseudo d'un utilisateur par son ID.
+ * @param userId - L'ID de l'utilisateur.
+ * @returns Le pseudo de l'utilisateur, ou null s'il n'est pas trouvé.
+ */
+export async function findUserPseudoById(userId: string): Promise<string | null> {
+    try {
+        const { rows } = await pool.query(
+            'SELECT pseudo FROM public.users WHERE id = $1',
+            [userId]
+        );
+        return rows.length > 0 ? rows[0].pseudo : null;
+    } catch (error) {
+        console.error('Error fetching user pseudo by ID:', error);
+        throw error; // ou retourner null selon la gestion d'erreur souhaitée
+    }
+}

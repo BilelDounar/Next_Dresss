@@ -48,6 +48,7 @@ export default function Slide({ publication }: SlideProps) {
 
     const [articles, setArticles] = useState<Article[]>([]);
     const [loadingArticles, setLoadingArticles] = useState(true);
+    const [creatorPseudo, setCreatorPseudo] = useState('');
 
     // La publication actuelle est directement celle passée en props.
     const currentPublication = publication;
@@ -99,6 +100,29 @@ export default function Slide({ publication }: SlideProps) {
 
         fetchArticlesForCurrentPublication();
     }, [currentPublication]);
+
+    useEffect(() => {
+        const fetchCreatorPseudo = async () => {
+            if (!currentPublication?.user) return;
+
+            try {
+                const response = await fetch(`/api/users/${currentPublication.user}/pseudo`);
+                const data = await response.json();
+                if (response.ok) {
+                    setCreatorPseudo(data.pseudo);
+                } else {
+                    console.warn('Erreur API:', data?.message);
+                    setCreatorPseudo('');
+                }
+            } catch (error) {
+                console.error("Erreur lors de la récupération du pseudo :", error);
+                setCreatorPseudo('');
+            }
+        };
+
+        fetchCreatorPseudo();
+    }, [currentPublication]);
+
 
     // Calcule le nombre de diapositives en toute sécurité.
     const slidesCount = currentPublication?.urlsPhotos?.length || 0;
@@ -295,7 +319,7 @@ export default function Slide({ publication }: SlideProps) {
                         <Avatar src="https://avatars.githubusercontent.com/u/105309377?v=4" alt="BD" size="md" isFollowed={false} onClick={() => console.log("clicked")} />
                         <div>
                             <h2 className="text-white font-bold text-lg truncate w-full max-w-[140px] min-[500px]:max-w-[250px] min-[600px]:max-w-[400px] min-[749px]:max-w-[500px] min-[750px]:max-w-[0]">
-                                {currentPublication._id}
+                                {creatorPseudo || 'Chargement...'}
                             </h2>
                             <p className="text-white font-normal text-md truncate w-full max-w-[140px] min-[500px]:max-w-[250px] min-[600px]:max-w-[400px] min-[749px]:max-w-[500px] min-[750px]:max-w-[0]">
                                 {currentPublication.description}
