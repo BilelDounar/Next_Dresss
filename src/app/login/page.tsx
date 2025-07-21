@@ -48,8 +48,8 @@ export default function LoginPage() {
     };
 
     return (
-        <div className="flex flex-col min-h-screen items-center p-8 pt-25">
-            <div className="fixed top-5 left-5">
+        <div className="flex flex-col min-h-screen items-center justify-center p-8 bg-white relative">
+            <div className="absolute top-5 left-5">
                 <Button type="button" openLink="/welcome" iconLeft={<ArrowLeftIcon />} size="default" variant="link" className="w-10 h-10 bg-primary-100 rounded-full flex justify-center items-center" />
             </div>
             <Image

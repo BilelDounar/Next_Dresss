@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import { useRouter } from 'next/navigation';
 import Slide from "@/app/Components/navigation/Slide";
 import { useAuth } from "@/hooks/useAuth";
+import "@/app/scroll.css";
 
 // Type pour une publication, correspondant à l'API
 type Publication = {
@@ -34,22 +35,15 @@ export default function HomePage() {
     }, [user, authLoading, authError, router]);
 
     useEffect(() => {
-        // LOG DE DÉBOGAGE POUR VOIR L'ÉTAT DE L'AUTH
-        console.log('État du hook useAuth:', { user, authLoading, authError });
-
         const fetchPublications = async () => {
-            // Ne rien faire si l'utilisateur n'est pas encore chargé
             if (!user) {
-                console.log('Appel API annulé : utilisateur non disponible.');
                 return;
             }
-            // Ne pas lancer la récupération si l'utilisateur va être redirigé
             if (user.status === 'pending') return;
 
             setLoading(true);
             try {
                 const apiUrl = process.env.NEXT_PUBLIC_API_MONGO;
-                // Utiliser l'ID de l'utilisateur (de PostgreSQL) directement
                 const response = await fetch(`${apiUrl}/api/publications?userId=${user.id}`);
                 if (!response.ok) {
                     throw new Error('La réponse du réseau n\'était pas bonne');
@@ -107,9 +101,9 @@ export default function HomePage() {
 
     return (
         <div className="flex flex-row">
-            <div className="snap-y snap-mandatory overflow-y-scroll h-[92vh] w-full min-[750px]:max-w-[500px] min-[750px]:h-screen min-[750px]:w-screen bg-primary-300">
+            <div className="snap-y snap-mandatory overflow-y-scroll h-[92vh] w-full bg-primary-300 invisible-scrollbar">
                 {loading ? (
-                    <div className="snap-start h-[92vh] min-[750px]:h-screen flex items-center justify-center">
+                    <div className="snap-start h-[92vh] flex items-center justify-center">
                         <p className="fixed top-[40%] right-[40%] text-white">Chargement...</p>
                     </div>
                 ) : (
@@ -123,7 +117,7 @@ export default function HomePage() {
                                     key={publication._id}
                                     ref={(el) => { slideRefs.current[index] = el; }}
                                     data-index={index}
-                                    className="snap-start w-full h-[92vh] min-[750px]:h-screen" // Conteneur pour l'observer
+                                    className="snap-start w-full h-[92vh]" // Conteneur pour l'observer
                                 >
                                     {isVisible ? (
                                         <Slide publication={publication} />
@@ -134,20 +128,12 @@ export default function HomePage() {
                             );
                         })
                     ) : (
-                        <p className="snap-start h-[92vh] min-[750px]:h-screen flex items-center justify-center">
+                        <p className="snap-start h-[92vh] flex items-center justify-center">
                             Aucune publication trouvée.
                         </p>
                     )
                 )}
             </div>
-
-            {/* Bloc latéral visible uniquement sur grand écran */}
-            {!loading && (
-                <div className="max-[750px]:hidden bg-amber-200 w-full">
-                    {/* Contenu réel à mettre ici */}
-                    <p>Contenu latéral</p>
-                </div>
-            )}
         </div>
     );
 }

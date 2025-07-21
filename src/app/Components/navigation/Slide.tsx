@@ -270,7 +270,7 @@ export default function Slide({ publication }: SlideProps) {
     return (
         <div
             ref={containerRef}
-            className="w-full h-[90vh] min-[750px]:min-[600px]:h-screen flex flex-col relative bg-primary-300" // Taille contrôlée par le parent, fond noir
+            className="w-full h-full flex flex-col relative bg-primary-300" // Taille contrôlée par le parent, fond noir
         >
             <div className="absolute bottom-36 right-4 flex flex-col justify-center items-center gap-y-5 z-10">
                 {actions.map(({ icon, count, onClick }, index) => (
@@ -291,7 +291,7 @@ export default function Slide({ publication }: SlideProps) {
                 {currentPublication?.urlsPhotos?.map((url, idx) => (
                     <div
                         key={`${currentPublication._id}-${idx}`}
-                        className="snap-start w-full h-full flex-shrink-0 relative flex items-center justify-center bg-primary-300" // Assure un fond noir pour l'image
+                        className="snap-start w-full h-full flex-shrink-0 relative flex items-center justify-center" // Assure un fond noir pour l'image
                         style={{ minWidth: "100%" }}
                     >
                         <Image
@@ -318,10 +318,10 @@ export default function Slide({ publication }: SlideProps) {
                     <div className="flex flex-row gap-4">
                         <Avatar src="https://avatars.githubusercontent.com/u/105309377?v=4" alt="BD" size="md" isFollowed={false} onClick={() => console.log("clicked")} />
                         <div>
-                            <h2 className="text-white font-bold text-lg truncate w-full max-w-[140px] min-[500px]:max-w-[250px] min-[600px]:max-w-[400px] min-[749px]:max-w-[500px] min-[750px]:max-w-[0]">
+                            <h2 className="text-white font-bold text-lg truncate w-full">
                                 {creatorPseudo || 'Chargement...'}
                             </h2>
-                            <p className="text-white font-normal text-md truncate w-full max-w-[140px] min-[500px]:max-w-[250px] min-[600px]:max-w-[400px] min-[749px]:max-w-[500px] min-[750px]:max-w-[0]">
+                            <p className="text-white font-normal text-md truncate w-full    ">
                                 {currentPublication.description}
                             </p>
                         </div>
