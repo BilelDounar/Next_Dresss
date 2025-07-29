@@ -3,24 +3,81 @@ const Publication = require('../models/publicationModel');
 const Article = require('../models/articleModel');
 const ViewedPublication = require('../models/viewedPublicationModel');
 
+// Cette fonction simule le téléversement d'un fichier et retourne une URL.
+// En production, vous la remplaceriez par une vraie logique de téléversement (ex: vers AWS S3, Cloudinary, etc.)
+const uploadFileSimulator = (file) => {
+    if (!file) return null;
+    // Simule un chemin de stockage public
+    return `/uploads/${Date.now()}_${file.originalname}`;
+};
+
 // @desc    Créer une publication
 // @route   POST /api/publications
 exports.createPublication = async (req, res) => {
     try {
-        const { description, articles, user, urlsPhotos } = req.body;
-        const publication = await Publication.create({ description, user, urlsPhotos });
-        let createdArticles = [];
-        if (Array.isArray(articles) && articles.length > 0) {
-            const articlesToCreate = articles.map(article => ({
-                ...article,
-                publicationId: publication._id,
-                user
-            }));
-            createdArticles = await Article.insertMany(articlesToCreate);
+        console.log('--- Début du contrôleur createPublication ---');
+        console.log('req.body:', req.body);
+        console.log('req.files:', req.files);
+
+        if (!req.files || !req.files.publicationPhoto || req.files.publicationPhoto.length === 0) {
+            return res.status(400).json({ message: "La photo principale de la publication est requise." });
         }
-        res.status(201).json({ publication, articles: createdArticles });
+
+        const { description, tags, userId } = req.body;
+        const articlesData = req.body.articles ? JSON.parse(req.body.articles) : [];
+        const { publicationPhoto, articlePhotos } = req.files;
+
+        if (!userId) {
+            return res.status(400).json({ message: "L'identifiant de l'utilisateur est requis." });
+        }
+
+        // Simuler le téléversement des photos de la publication
+        const publicationPhotoUrls = publicationPhoto.map(file => uploadFileSimulator(file));
+
+        const newPublication = new Publication({
+            description,
+            tags: tags || [],
+            user: userId, // Utiliser l'ID de l'utilisateur provenant de la requête
+            urlsPhotos: publicationPhotoUrls,
+            articles: [],
+        });
+
+        // Traiter et créer les articles
+        if (articlesData && articlesData.length > 0) {
+            const articlePromises = articlesData.map(async (articleInfo, index) => {
+                const articlePhotoFile = articlePhotos ? articlePhotos[index] : null;
+                if (!articlePhotoFile) {
+                    throw new Error(`La photo pour l'article '${articleInfo.title}' est manquante.`);
+                }
+
+                const articlePhotoUrl = uploadFileSimulator(articlePhotoFile);
+
+                const newArticle = new Article({
+                    publicationId: newPublication._id,
+                    titre: articleInfo.title,
+                    description: articleInfo.description,
+                    prix: articleInfo.price,
+                    lien: articleInfo.link,
+                    urlPhoto: articlePhotoUrl,
+                    user: userId,
+                });
+                return newArticle.save();
+            });
+
+            const savedArticles = await Promise.all(articlePromises);
+            newPublication.articles = savedArticles.map(article => article._id);
+        }
+
+        await newPublication.save();
+
+        res.status(201).json({
+            message: 'Publication créée avec succès!',
+            publication: newPublication
+        });
+
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        console.error('Erreur lors de la création de la publication:', error);
+        res.status(500).json({ message: error.message || 'Erreur serveur lors de la création de la publication.' });
     }
 };
 
@@ -122,7 +179,7 @@ exports.markPublicationAsViewed = async (req, res) => {
 // @route   GET /api/publications/:id/articles
 exports.getArticlesByPublication = async (req, res) => {
     try {
-        const articles = await Article.find({ publicationId: req.params.id });
+        const articles = await Article.find({ publication: req.params.id });
         if (!articles || articles.length === 0) {
             return res.status(404).json({ message: 'Aucun article trouvé pour cette publication' });
         }

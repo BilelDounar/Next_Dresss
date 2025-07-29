@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import AppShell from "@/components/layout/AppShell";
+import { LayoutProvider } from '@/context/LayoutContext';
+import { AuthProvider } from '@/context/AuthContext';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -69,8 +71,14 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased h-fit bg-primary-300`}
       >
-        <main className="h-full overflow-y-hidden max-w-[450px] mx-auto">{children}</main>
-        <AppShell />
+        <main className="h-full overflow-y-hidden max-w-[450px] mx-auto">
+          <AuthProvider>
+            <LayoutProvider>
+              {children}
+              <AppShell />
+            </LayoutProvider>
+          </AuthProvider>
+        </main>
       </body>
     </html>
   );

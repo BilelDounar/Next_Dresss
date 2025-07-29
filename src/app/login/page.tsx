@@ -8,20 +8,24 @@ import Image from "next/image";
 import { Input } from "@/components/atom/input";
 import Button from "@/components/atom/button";
 import { ArrowLeftIcon } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function LoginPage() {
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [error, setError] = useState('');
     const router = useRouter();
-    const [error, setError] = useState<string | null>(null);
+    const { login } = useAuth();
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        setError(null);
-
-        const formData = new FormData(event.currentTarget);
-        const email = formData.get('email') as string;
-        const password = formData.get('password') as string;
+        setError('');
 
         try {
+            const formData = new FormData(event.currentTarget);
+            const email = formData.get('email') as string;
+            const password = formData.get('password') as string;
+
             const response = await fetch("/api/auth/login", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -31,9 +35,11 @@ export default function LoginPage() {
             const data = await response.json();
 
             if (!response.ok) {
-                setError(data.error || "Email ou mot de passe incorrect.");
-                return;
+                throw new Error(data.error || "Email ou mot de passe incorrect.");
             }
+
+            // Appel correct : on passe l'objet utilisateur (data.user) et le token (data.token)
+            login({ user: data.user, token: data.token });
 
             if (data.user.status === 'pending') {
                 router.push('/about-you');

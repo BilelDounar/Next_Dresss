@@ -285,7 +285,7 @@ export default function Slide({ publication }: SlideProps) {
 
             <div
                 ref={horizontalRef}
-                className="flex overflow-x-scroll snap-x snap-mandatory w-full h-full"
+                className="flex overflow-x-scroll snap-x snap-mandatory w-full h-full invisible-scrollbar"
                 onScroll={handleScroll}
             >
                 {currentPublication?.urlsPhotos?.map((url, idx) => (
@@ -340,7 +340,7 @@ export default function Slide({ publication }: SlideProps) {
             )}
 
             <Transition show={isModalOpen} as={Fragment}>
-                <div className="fixed inset-0 z-50">
+                <div className="fixed inset-0 z-50 flex justify-center items-end">
                     <Transition
                         as={Fragment}
                         enter="ease-out duration-200"
@@ -359,15 +359,15 @@ export default function Slide({ publication }: SlideProps) {
                     <Transition
                         as={Fragment}
                         enter="ease-out duration-300"
-                        enterFrom="translate-y-full"
-                        enterTo="translate-y-[30vh]"
+                        enterFrom="opacity-0 scale-95"
+                        enterTo="opacity-100 scale-100"
                         leave="ease-in duration-200"
                         leaveFrom="translate-y-[30vh]"
                         leaveTo="translate-y-full"
                     >
                         <div
                             ref={sheetRef}
-                            className="absolute bottom-0 w-full h-[80vh] bg-white rounded-t-2xl shadow-xl p-6"
+                            className="absolute bottom-0 w-full max-w-[450px] h-[80vh] bg-white rounded-t-2xl shadow-xl p-6"
                             style={{
                                 transform: `translateY(${dragOffset}px)`,
                                 transition: isDragging ? "none" : "transform 0.2s ease-out",

@@ -1,14 +1,16 @@
 "use client";
 
 import { usePathname } from 'next/navigation';
+import { useLayout } from '@/context/LayoutContext';
 import DockNavigationWrapper from '@/app/Components/navigation/DockNavigationWrapper';
 
-const noNavPaths = ['/login', '/register', '/welcome', '/about-you', '/legal', '/privacy', '/not-found'];
+const noNavPaths = ['/login', '/register', '/welcome', '/about-you', '/legal', '/privacy', '/not-found', '/create'];
 
 export default function AppShell() {
     const pathname = usePathname();
+    const { isNavbarVisible } = useLayout();
 
-    if (noNavPaths.includes(pathname || '')) {
+    if (noNavPaths.includes(pathname || '') || !isNavbarVisible) {
         return null;
     }
 

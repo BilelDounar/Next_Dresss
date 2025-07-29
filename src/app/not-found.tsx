@@ -1,9 +1,19 @@
 'use client';
 
+import { useEffect } from 'react';
+import { useLayout } from '@/context/LayoutContext';
 import { ArrowLeftIcon } from 'lucide-react';
 import Button from '@/components/atom/button';
 
 export default function NotFound() {
+    const { setNavbarVisible } = useLayout();
+
+    useEffect(() => {
+        setNavbarVisible(false);
+        // Rétablir la visibilité lors du démontage du composant
+        return () => setNavbarVisible(true);
+    }, [setNavbarVisible]);
+
     return (
         <main className="min-h-screen flex flex-col items-center justify-center text-center bg-white  px-6">
             <h1 className="text-[100px] font-extrabold leading-none tracking-tight text-primary-900 drop-shadow-md">404</h1>
