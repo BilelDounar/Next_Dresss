@@ -1,68 +1,63 @@
 // src/app/login/page.tsx
 "use client";
 
-import { useState, FormEvent } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image"; // Importer le composant Image
+import Image from "next/image";
 import { Input } from "@/components/atom/input";
 import Button from "@/components/atom/button";
 import { ArrowLeftIcon } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function LoginPage() {
+    const [error, setError] = useState('');
     const router = useRouter();
-    const [formData, setFormData] = useState({
-        email: "",
-        password: "",
-    });
-    const [error, setError] = useState<string | null>(null);
+    const { login } = useAuth();
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
-    };
-
-    const handleSubmit = async (e: FormEvent) => {
-        e.preventDefault();
-        setError(null);
+    const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        setError('');
 
         try {
+            const formData = new FormData(event.currentTarget);
+            const email = formData.get('email') as string;
+            const password = formData.get('password') as string;
+
             const response = await fetch("/api/auth/login", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(formData),
+                body: JSON.stringify({ email, password }),
             });
 
             const data = await response.json();
 
             if (!response.ok) {
-                throw new Error(data.error || "Une erreur est survenue.");
+                throw new Error(data.error || "Email ou mot de passe incorrect.");
             }
 
-            // Redirection en fonction de la vérification de l'email
-            if (data.email_verified) {
-                router.push('/home');
+            // Appel correct : on passe l'objet utilisateur (data.user) et le token (data.token)
+            login({ user: data.user, token: data.token });
+
+            if (data.user.status === 'pending') {
+                router.push('/about-you');
             } else {
-                router.push('/verify');
+                router.push('/home');
             }
-            router.refresh();
 
         } catch (err) {
-            // Remplacer 'any' par un type plus spécifique
-            if (err instanceof Error) {
-                setError(err.message);
-            } else {
-                setError('Une erreur inconnue est survenue.');
-            }
+            console.error("Erreur réseau ou de parsing JSON:", err);
+            setError("Impossible de contacter le serveur. Veuillez réessayer.");
         }
     };
 
     return (
-        <div className="flex flex-col h-screen items-center p-8 pt-25">
-            <div className="fixed top-5 left-5">
+        <div className="flex flex-col min-h-screen items-center justify-center p-8 bg-white relative">
+            <div className="absolute top-5 left-5">
                 <Button type="button" openLink="/welcome" iconLeft={<ArrowLeftIcon />} size="default" variant="link" className="w-10 h-10 bg-primary-100 rounded-full flex justify-center items-center" />
             </div>
             <Image
-                src="./icons/logo_full_fit.png"
+                src="/icons/logo_full_fit.png"
                 alt="Logo"
                 width={200}
                 height={200}
@@ -70,16 +65,20 @@ export default function LoginPage() {
             />
             <h2 className="text-2xl font-bold font-outfit mb-4 text-center">Connexion</h2>
 
-            <form onSubmit={handleSubmit} className="w-full">
-                {error && <p className="text-red-500 mb-2">{error}</p>}
+            <form onSubmit={handleSubmit} className="space-y-6 w-full">
+                {error && (
+                    <div className="text-left text-sm text-red-600 bg-red-100 border border-red-400 rounded-md p-3 whitespace-pre-wrap">
+                        <strong>Erreur :</strong> {error}
+                    </div>
+                )}
 
                 <div className="mb-4">
                     <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>
-                    <Input type="email" name="email" id="email" placeholder="Email" required onChange={handleChange} />
+                    <Input type="email" name="email" id="email" placeholder="Email" required />
                 </div>
                 <div className="mb-4">
                     <label htmlFor="password" className="block text-sm font-medium text-gray-700">Mot de passe</label>
-                    <Input type="password" name="password" id="password" placeholder="Mot de passe" required onChange={handleChange} />
+                    <Input type="password" name="password" id="password" placeholder="Mot de passe" required />
                 </div>
 
                 <Button type="submit" className="w-full">Se connecter</Button>

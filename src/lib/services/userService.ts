@@ -65,10 +65,10 @@ export async function createUser(data: NewUser) {
         `
     INSERT INTO public.users(
         nom, prenom, pseudo, email, password_hash, role, status, email_verified, followers_count, posts_count, verification_token, verification_expires_at, language, created_at, updated_at
-    ) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, NOW(), NOW())
-    RETURNING id, nom, prenom, pseudo, email, email_verified
+    ) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, NOW(), NOW())
+    RETURNING id, nom, prenom, pseudo, email, email_verified, status
     `,
-        [nom, prenom, pseudo, email.trim(), password_hash, "user", "pending", false, 0, 0, verificationToken, verificationExpiresAt, "fr",]
+        [nom, prenom, pseudo, email.trim(), password_hash, "user", "pending", false, 0, 0, verificationToken, verificationExpiresAt, "fr"]
     );
 
     // Envoyer l'e-mail de vérification
@@ -109,4 +109,22 @@ export async function resetVerificationToken(userId: string): Promise<string | n
     await sendVerificationEmail(email, verificationToken);
 
     return verificationToken;
+}
+
+/**
+ * Récupère le pseudo d'un utilisateur par son ID.
+ * @param userId - L'ID de l'utilisateur.
+ * @returns Le pseudo de l'utilisateur, ou null s'il n'est pas trouvé.
+ */
+export async function findUserPseudoById(userId: string): Promise<string | null> {
+    try {
+        const { rows } = await pool.query(
+            'SELECT pseudo FROM public.users WHERE id = $1',
+            [userId]
+        );
+        return rows.length > 0 ? rows[0].pseudo : null;
+    } catch (error) {
+        console.error('Error fetching user pseudo by ID:', error);
+        throw error; // ou retourner null selon la gestion d'erreur souhaitée
+    }
 }

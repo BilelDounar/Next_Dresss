@@ -56,7 +56,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { password_hash, ...userResponse } = user;
 
-        return res.status(200).json(userResponse);
+        return res.status(200).json({
+            message: "Connexion réussie",
+            user: {
+                id: userResponse.id,
+                status: userResponse.status,
+                email: userResponse.email
+            }
+        });
 
     } catch (error) {
         console.log("[ERREUR] Une erreur s'est produite pendant la connexion.");
@@ -64,6 +71,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             return res.status(400).json({ error: error.errors.map(e => e.message).join(', ') });
         }
         console.error('Login error:', error);
-        return res.status(500).json({ error: 'Erreur interne du serveur.' });
+        console.error("Email de la tentative:", req.body?.email);
+        console.error("Erreur:", error);
+        console.error("--- FIN ERREUR API CONNEXION ---\n");
+
+        // Toujours renvoyer l'erreur détaillée pour le débogage
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        return res.status(500).json({ error: `Erreur interne du serveur: ${errorMessage}` });
     }
 }

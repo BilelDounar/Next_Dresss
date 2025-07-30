@@ -19,7 +19,7 @@ const CardItem: React.FC<CardItemProps> = ({ title, description, price, urlPhoto
                 <div className="w-2/5 bg-primary-100 rounded-2xl">
                     <figure className="w-full h-34 relative">
                         <Image
-                            src={urlPhoto}
+                            src={`${process.env.NEXT_PUBLIC_API_MONGO}${urlPhoto}`}
                             alt={`Photo ${title}`}
                             layout="fill"
                             objectFit="cover"

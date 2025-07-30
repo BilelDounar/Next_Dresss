@@ -6,15 +6,15 @@ import Button from "@/components/atom/button";
 
 export default function RegisterPage() {
     return (
-        <div className="flex flex-col h-full items-center">
+        <div className="flex flex-col min-h-screen items-center justify-start bg-white">
             <Image
-                src="./photo/welcome_bg.jpg"
+                src="/photo/welcome_bg.jpg"
                 alt="Background"
                 width={1920}
                 height={1080}
-                className="h-1/2 lg:h-[30vh] w-full object-cover"
+                className="h-[50dvh] w-full object-cover"
             />
-            <div className="h-1/2 lg:h-[30vh] flex flex-col items-center">
+            <div className="h-[50dvh] flex flex-col items-center pt-8">
                 <div className="flex flex-col items-center my-4">
                     <p className="text-2xl font-bold text-center font-montserrat">Exprimez votre <span className="text-primary-900 text-[28px] font-logo">style</span>,</p>
                     <p className="text-xl font-light text-center font-montserrat">partagez vos looks.</p>
@@ -29,10 +29,10 @@ export default function RegisterPage() {
                         </Button>
                     </div>
                     <div className="">
-                        <Button type="button" openLink="/login" variant="link" className="w-full text-sm">
+                        <Button type="button" openLink="/legal" variant="link" className="w-full text-sm">
                             Condition d&apos;utilisation
                         </Button>
-                        <Button type="button" openLink="/login" variant="link" className="w-full text-sm">
+                        <Button type="button" openLink="/privacy" variant="link" className="w-full text-sm">
                             Politique de confidentialité
                         </Button>
                     </div>

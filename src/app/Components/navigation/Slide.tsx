@@ -48,6 +48,7 @@ export default function Slide({ publication }: SlideProps) {
 
     const [articles, setArticles] = useState<Article[]>([]);
     const [loadingArticles, setLoadingArticles] = useState(true);
+    const [creatorPseudo, setCreatorPseudo] = useState('');
 
     // La publication actuelle est directement celle passée en props.
     const currentPublication = publication;
@@ -99,6 +100,29 @@ export default function Slide({ publication }: SlideProps) {
 
         fetchArticlesForCurrentPublication();
     }, [currentPublication]);
+
+    useEffect(() => {
+        const fetchCreatorPseudo = async () => {
+            if (!currentPublication?.user) return;
+
+            try {
+                const response = await fetch(`/api/users/${currentPublication.user}/pseudo`);
+                const data = await response.json();
+                if (response.ok) {
+                    setCreatorPseudo(data.pseudo);
+                } else {
+                    console.warn('Erreur API:', data?.message);
+                    setCreatorPseudo('');
+                }
+            } catch (error) {
+                console.error("Erreur lors de la récupération du pseudo :", error);
+                setCreatorPseudo('');
+            }
+        };
+
+        fetchCreatorPseudo();
+    }, [currentPublication]);
+
 
     // Calcule le nombre de diapositives en toute sécurité.
     const slidesCount = currentPublication?.urlsPhotos?.length || 0;
@@ -246,9 +270,9 @@ export default function Slide({ publication }: SlideProps) {
     return (
         <div
             ref={containerRef}
-            className="w-full h-[90vh] min-[750px]:min-[600px]:h-screen flex flex-col relative bg-primary-300" // Taille contrôlée par le parent, fond noir
+            className="w-full h-full flex flex-col relative bg-primary-300" // Taille contrôlée par le parent, fond noir
         >
-            <div className="absolute bottom-36 right-4 flex flex-col justify-center items-center gap-y-5">
+            <div className="absolute bottom-36 right-4 flex flex-col justify-center items-center gap-y-5 z-10">
                 {actions.map(({ icon, count, onClick }, index) => (
                     <ActionButton
                         key={index}
@@ -261,27 +285,26 @@ export default function Slide({ publication }: SlideProps) {
 
             <div
                 ref={horizontalRef}
-                className="flex overflow-x-scroll snap-x snap-mandatory w-full h-full"
+                className="flex overflow-x-scroll snap-x snap-mandatory w-full h-full invisible-scrollbar"
                 onScroll={handleScroll}
             >
                 {currentPublication?.urlsPhotos?.map((url, idx) => (
                     <div
                         key={`${currentPublication._id}-${idx}`}
-                        className="snap-start w-full h-full flex-shrink-0 flex items-center justify-center bg-primary-300" // Assure un fond noir pour l'image
+                        className="snap-start w-full h-full flex-shrink-0 relative flex items-center justify-center" // Assure un fond noir pour l'image
                         style={{ minWidth: "100%" }}
                     >
                         <Image
-                            src={url}
+                            src={`${process.env.NEXT_PUBLIC_API_MONGO}${url}`}
                             alt={`Photo ${idx + 1} de la publication`}
-                            width={500}
-                            height={300}
-                            objectFit="cover"
+                            fill
+                            className="object-cover"
                         />
                     </div>
                 ))}
             </div>
 
-            <div className="absolute bottom-22 left-1/2 transform -translate-x-1/2 flex gap-2">
+            <div className="absolute bottom-22 left-1/2 transform -translate-x-1/2 flex gap-2 z-10">
                 {dotIndices().map((idx) => (
                     <span
                         key={idx}
@@ -291,14 +314,14 @@ export default function Slide({ publication }: SlideProps) {
             </div>
 
             {currentPublication && (
-                <div className="absolute bottom-4 px-4 w-full flex justify-between items-center">
+                <div className="absolute bottom-4 px-4 w-full flex justify-between items-center z-10">
                     <div className="flex flex-row gap-4">
                         <Avatar src="https://avatars.githubusercontent.com/u/105309377?v=4" alt="BD" size="md" isFollowed={false} onClick={() => console.log("clicked")} />
                         <div>
-                            <h2 className="text-white font-bold text-lg truncate w-full max-w-[140px] min-[500px]:max-w-[250px] min-[600px]:max-w-[400px] min-[749px]:max-w-[500px] min-[750px]:max-w-[0]">
-                                {currentPublication._id}
+                            <h2 className="text-white font-bold text-lg truncate w-full">
+                                {creatorPseudo || 'Chargement...'}
                             </h2>
-                            <p className="text-white font-normal text-md truncate w-full max-w-[140px] min-[500px]:max-w-[250px] min-[600px]:max-w-[400px] min-[749px]:max-w-[500px] min-[750px]:max-w-[0]">
+                            <p className="text-white font-normal text-md truncate w-full    ">
                                 {currentPublication.description}
                             </p>
                         </div>
@@ -317,7 +340,7 @@ export default function Slide({ publication }: SlideProps) {
             )}
 
             <Transition show={isModalOpen} as={Fragment}>
-                <div className="fixed inset-0 z-50">
+                <div className="fixed inset-0 z-50 flex justify-center items-end">
                     <Transition
                         as={Fragment}
                         enter="ease-out duration-200"
@@ -336,15 +359,15 @@ export default function Slide({ publication }: SlideProps) {
                     <Transition
                         as={Fragment}
                         enter="ease-out duration-300"
-                        enterFrom="translate-y-full"
-                        enterTo="translate-y-[30vh]"
+                        enterFrom="opacity-0 scale-95"
+                        enterTo="opacity-100 scale-100"
                         leave="ease-in duration-200"
                         leaveFrom="translate-y-[30vh]"
                         leaveTo="translate-y-full"
                     >
                         <div
                             ref={sheetRef}
-                            className="absolute bottom-0 w-full h-[80vh] bg-white rounded-t-2xl shadow-xl p-6"
+                            className="absolute bottom-0 w-full max-w-[450px] h-[80vh] bg-white rounded-t-2xl shadow-xl p-6"
                             style={{
                                 transform: `translateY(${dragOffset}px)`,
                                 transition: isDragging ? "none" : "transform 0.2s ease-out",

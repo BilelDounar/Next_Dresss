@@ -1,39 +1,12 @@
-import { useState, useEffect } from 'react';
+"use client";
 
-interface UserSession {
-    id: string;
-    email: string;
-    status: string;
-    email_verified: boolean;
-}
+import { useContext } from 'react';
+import { AuthContext } from '../context/AuthContext';
 
 export const useAuth = () => {
-    const [user, setUser] = useState<UserSession | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-
-    useEffect(() => {
-        const fetchUser = async () => {
-            try {
-                const response = await fetch('/api/auth/me');
-                if (!response.ok) {
-                    throw new Error('Utilisateur non authentifié');
-                }
-                const data: UserSession = await response.json();
-                setUser(data);
-            } catch (err) {
-                if (err instanceof Error) {
-                    setError(err.message);
-                } else {
-                    setError('Une erreur inconnue est survenue.');
-                }
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchUser();
-    }, []);
-
-    return { user, loading, error };
+    const context = useContext(AuthContext);
+    if (context === undefined) {
+        throw new Error('useAuth must be used within an AuthProvider');
+    }
+    return context;
 };

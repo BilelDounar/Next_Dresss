@@ -14,7 +14,7 @@ export default function ActionButton({ Icon, count, onClick }: ActionButtonProps
         >
             {Icon}
             {count !== undefined && (
-                <span className="text-xl text-white font-semibold">{count}</span>
+                <span className="text-xl text-white font-semibold drop-shadow-xl/15">{count}</span>
             )}
         </button>
     );
