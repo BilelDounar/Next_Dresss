@@ -68,7 +68,7 @@ export default function AddArticleModal({ isOpen, onClose, onAddArticle }: AddAr
     return (
         <div className={`fixed py-4 inset-0 bg-[#F5F5F1] z-50 transform transition-transform duration-500 ease-in-out ${isOpen ? 'translate-x-0' : 'translate-x-full'} flex flex-col`}>
             <header className="flex items-center mb-8 px-4 ">
-                <button onClick={onClose} className="flex items-center font-serif text-lg">
+                <button onClick={(e) => { onClose(); e.preventDefault() }} className="flex items-center font-serif text-lg">
                     <ArrowLeft className="w-5 h-5 mr-2" />
                     Retour
                 </button>
@@ -110,7 +110,7 @@ export default function AddArticleModal({ isOpen, onClose, onAddArticle }: AddAr
             </div>
 
             <footer className="mt-auto pt-4 px-4">
-                <Button onClick={handleAddArticle} type="button" variant="default" size="lg" iconLeft={<Plus />} className="w-full font-outfit font-semibold text-xl">
+                <Button onClick={(e) => { handleAddArticle(); e.preventDefault() }} type="button" variant="default" size="lg" iconLeft={<Plus />} className="w-full font-outfit font-semibold text-xl">
                     Ajouter
                 </Button>
             </footer>

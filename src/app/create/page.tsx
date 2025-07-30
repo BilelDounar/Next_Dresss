@@ -76,7 +76,15 @@ export default function CreatePostPage() {
         });
 
         // Ajouter les données des articles et leurs photos
-        formData.append('articles', JSON.stringify(articles));
+        // Le backend attend les champs en français : titre, prix, lien
+        const articlesPayload = articles.map(({ title, description, price, link }) => ({
+            titre: title,
+            description,
+            prix: Number(price), // convertir en nombre
+            lien: link,
+        }));
+
+        formData.append('articles', JSON.stringify(articlesPayload));
         articles.forEach((article, index) => {
             // Ajoute la photo de l'article si elle existe
             if (article.photo) {
@@ -93,9 +101,7 @@ export default function CreatePostPage() {
             });
 
             if (response.ok) {
-                alert('Publication créée avec succès!');
-                // Optionnel: rediriger l'utilisateur
-                // window.location.href = '/';
+                window.location.href = '/profil';
             } else {
                 const responseData = await response.json();
                 throw new Error(responseData.message || 'Une erreur est survenue lors de la publication.');

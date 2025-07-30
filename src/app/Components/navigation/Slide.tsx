@@ -295,7 +295,7 @@ export default function Slide({ publication }: SlideProps) {
                         style={{ minWidth: "100%" }}
                     >
                         <Image
-                            src={url}
+                            src={`${process.env.NEXT_PUBLIC_API_MONGO}${url}`}
                             alt={`Photo ${idx + 1} de la publication`}
                             fill
                             className="object-cover"
