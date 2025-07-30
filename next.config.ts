@@ -22,6 +22,9 @@ const nextConfig: NextConfig = {
       }
     ],
   },
+  devIndicators: {
+    position: 'top-left', 
+  },
 };
 
 export default nextConfig;

@@ -23,8 +23,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       // On ajoute des valeurs par défaut pour ne pas casser le frontend
       const userProfile = {
         ...rows[0],
-        followersCount: 0, // Valeur temporaire
-        followingCount: 0, // Valeur temporaire
       };
 
       return res.status(200).json(userProfile);
