@@ -16,7 +16,7 @@ export default function CreatePostPage() {
     const [selectedPhotos, setSelectedPhotos] = useState<File[]>([]);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [description, setDescription] = useState('');
-    const { user, token, loading: authLoading } = useAuth();
+    const { user } = useAuth();
     const [tags, setTags] = useState<string[]>([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [articles, setArticles] = useState<Article[]>([]);

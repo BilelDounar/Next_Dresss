@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from 'react';
-import { ArrowLeft, Plus, X } from 'lucide-react';
+import { ArrowLeft, Plus } from 'lucide-react';
 import { Input } from '@/components/atom/input';
 import { Textarea } from '@/components/atom/textarea';
 import Button from '@/components/atom/button';
@@ -75,7 +75,7 @@ export default function AddArticleModal({ isOpen, onClose, onAddArticle }: AddAr
             </header>
 
             <div className="flex-grow overflow-y-auto px-4 ">
-                <h2 className="font-serif text-2xl font-bold mb-2">Photo de l'article</h2>
+                <h2 className="font-serif text-2xl font-bold mb-2">Photo de l&apos;article</h2>
                 <div
                     className="w-40 h-40 bg-gray-300 rounded-lg flex items-center justify-center cursor-pointer mb-6 relative overflow-hidden"
                     onClick={handlePhotoClick}
