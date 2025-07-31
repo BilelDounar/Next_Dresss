@@ -28,7 +28,7 @@ type Props = {
 
 export default function Avatar({ size, isFollowed, src, alt, onClick }: Props) {
     return (
-        <div className="relative inline-flex">
+        <div className="relative flex justify-center items-center">
             <DefaultAvatar className={cn(avatarVariant({ size }))} onClick={onClick}>
                 <AvatarImage
                     className="aspect-square size-full object-cover"
@@ -39,7 +39,7 @@ export default function Avatar({ size, isFollowed, src, alt, onClick }: Props) {
                     "text-center flex justify-center content-center items-center h-full font-logo bg-primary-300 ",
                     size === "sm" && "text-xs",
                     size === "md" && "text-sm",
-                    size === "lg" && "text-2xl"
+                    size === "lg" && "text-4xl"
                 )}>{alt}</AvatarFallback>
             </DefaultAvatar>
 
