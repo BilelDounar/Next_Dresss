@@ -2,7 +2,8 @@ import { Avatar as DefaultAvatar, AvatarFallback, AvatarImage } from "@/componen
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 import { ComponentProps } from "react";
-import { PlusIcon } from "lucide-react"
+import { PlusIcon } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 const avatarVariant = cva("block size-8 rounded-full overflow-hidden", {
     variants: {
@@ -22,14 +23,25 @@ export type Size = AvatarVariantProps["size"];
 
 type Props = {
     isFollowed?: boolean,
+    clickable?: boolean,
+    href?: string,
     onClick?: () => void,
 } & AvatarVariantProps &
     Pick<ComponentProps<typeof AvatarImage>, "src" | "alt">;
 
-export default function Avatar({ size, isFollowed, src, alt, onClick }: Props) {
+export default function Avatar({ size, isFollowed, src, alt, onClick, clickable = false, href }: Props) {
+    const router = useRouter();
+    const handleClick = () => {
+        if (clickable && href) {
+            router.push(href);
+        } else if (onClick) {
+            onClick();
+        }
+    };
+
     return (
         <div className="relative flex justify-center items-center">
-            <DefaultAvatar className={cn(avatarVariant({ size }))} onClick={onClick}>
+            <DefaultAvatar className={cn(avatarVariant({ size }))} onClick={handleClick}>
                 <AvatarImage
                     className="aspect-square size-full object-cover"
                     src={src}

@@ -400,7 +400,7 @@ export default function Slide({ publication }: SlideProps) {
                     <div className="flex flex-row justify-center items-center gap-4">
                         {userProfile ? (
 
-                            <Avatar src={process.env.NEXT_PUBLIC_API_MONGO + userProfile.profile_picture_url} alt={getInitials(userProfile.pseudo)} size="md" isFollowed={true} />
+                            <Avatar clickable={true} href={`/profil/${userProfile.id}`} src={process.env.NEXT_PUBLIC_API_MONGO + userProfile.profile_picture_url} alt={getInitials(userProfile.pseudo)} size="md" isFollowed={true} />
 
                         ) : (
                             <Skeleton className="w-12 h-12 rounded-full mb-4 bg-white" />

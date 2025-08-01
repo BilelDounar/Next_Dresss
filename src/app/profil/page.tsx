@@ -127,7 +127,7 @@ export default function ProfilPage() {
                     {userProfile ? (
                         <>
                             <h1 className="text-2xl font-bold">{`${userProfile.prenom} ${userProfile.nom}`}</h1>
-                            <p className="text-gray-500 mb-4">@{userProfile.pseudo}</p>
+                            <p className="text-gray-500 mb-4 font-outfit">@{userProfile.pseudo}</p>
                         </>
                     ) : (
                         <>
@@ -137,16 +137,24 @@ export default function ProfilPage() {
                     )}
 
                     {/* Stats */}
-                    <div className="flex space-x-8 mb-6">
+                    <div className="flex space-x-8 mb-2">
                         <div className="text-center">
-                            <div className="font-bold text-lg">{userProfile ? userProfile.followers_count : <Skeleton className="bg-primary-300 h-5 w-10 rounded" />}</div>
+                            <div className="font-bold text-lg font-montserrat">{userProfile ? userProfile.followers_count : <Skeleton className="bg-primary-300 h-5 w-10 rounded" />}</div>
                             <p className="text-sm text-gray-600">Followers</p>
                         </div>
                         <div className="text-center">
-                            <div className="font-bold text-lg">
+                            <div className="font-bold text-lg font-montserrat">
                                 {userProfile ? publications.length : <Skeleton className="bg-primary-300 h-5 w-10 rounded" />}
                             </div>
                             <p className="text-sm text-gray-600">Looks</p>
+                        </div>
+                    </div>
+                    <hr className=" border w-1/3" />
+
+                    {/* Bio */}
+                    <div className="flex mb-2 w-full mt-2">
+                        <div className="w-full text-center">
+                            <p className="w-fulltext-sm text-gray-600">{userProfile?.bio}</p>
                         </div>
                     </div>
 
