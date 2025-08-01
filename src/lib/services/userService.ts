@@ -128,3 +128,21 @@ export async function findUserPseudoById(userId: string): Promise<string | null>
         throw error; // ou retourner null selon la gestion d'erreur souhaitée
     }
 }
+
+/**
+ * Recherche des utilisateurs par pseudo, nom ou prénom (insensible à la casse).
+ * @param query Chaîne recherchée
+ * @returns Liste d'utilisateurs (id, nom, prenom, pseudo, profile_picture_url)
+ */
+export async function searchUsers(query: string) {
+    const like = `%${query}%`;
+    const { rows } = await pool.query(
+        `SELECT id, nom, prenom, pseudo, profile_picture_url
+         FROM public.users
+         WHERE pseudo ILIKE $1 OR nom ILIKE $1 OR prenom ILIKE $1
+         ORDER BY pseudo ASC
+         LIMIT 10`,
+        [like]
+    );
+    return rows;
+}

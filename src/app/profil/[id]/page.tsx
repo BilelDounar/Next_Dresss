@@ -132,10 +132,10 @@ export default function ProfilPage() {
             <div className="max-w-md mx-auto p-4 pt-12">
                 {/* Header */}
                 <header className="flex items-center justify-between mb-2 ">
-                    <Link href="/home" className="flex items-center">
+                    <button onClick={() => router.back()} className="flex items-center">
                         <ChevronLeft className="w-6 h-6" />
                         <span className="ml-2 text-base font-outfit font-base">Retour</span>
-                    </Link>
+                    </button>
                 </header>
 
                 {/* Avatar */}
