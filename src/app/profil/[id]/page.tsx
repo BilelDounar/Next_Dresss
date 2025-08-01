@@ -2,13 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { useAuth } from "@/hooks/useAuth";
 import Avatar from "@/components/atom/avatar";
 import Button from "@/components/atom/button";
 import { ChevronLeft, Plus, Share2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import Image from "next/image";
-import Link from "next/link";
 import { useRef } from "react";
 import Slide from "@/app/Components/navigation/Slide";
 import "@/app/scroll.css";
@@ -33,7 +31,6 @@ interface UserProfile {
 }
 
 export default function ProfilPage() {
-    const { user } = useAuth();
     const params = useParams();
     const router = useRouter();
     const id = params?.id as string | undefined;
@@ -179,8 +176,8 @@ export default function ProfilPage() {
                     <hr className=" border w-1/3" />
                     {/* Bio */}
                     <div className="flex mb-2 w-full mt-2">
-                        <div className="w-full ">
-                            <p className="w-fulltext-sm text-gray-600">{userProfile?.bio}</p>
+                        <div className="w-full flex items-center justify-center">
+                            {loadingProfile ? <Skeleton className="bg-primary-300 h-5 w-20 rounded" /> : <p className="w-fulltext-sm text-gray-600"> {userProfile?.bio}</p>}
                         </div>
                     </div>
                     {/* Bouton */}

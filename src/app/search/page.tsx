@@ -2,19 +2,10 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { Input } from '@/components/atom/input';
 import Avatar from '@/components/atom/avatar';
-import { X } from 'lucide-react';
 import Image from 'next/image';
 
-// Définition du type pour un profil récent
-type RecentProfile = {
-    id: number;
-    name: string;
-    handle: string;
-    avatar?: string;
-};
 
 // Type retourné par l'API
 interface UserResult {
@@ -27,17 +18,9 @@ interface UserResult {
 
 export default function SearchPage() {
     const [search, setSearch] = useState('');
-    const [recent, setRecent] = useState<RecentProfile[]>([
-        { id: 1, name: 'Bilel Dounar', handle: '@blx___x' },
-        { id: 2, name: 'Bilel Dounar', handle: '@blx___x' },
-    ]);
-
     const [results, setResults] = useState<UserResult[]>([]);
     const [loading, setLoading] = useState(false);
 
-    const removeRecent = (id: number) => {
-        setRecent((prev) => prev.filter((p) => p.id !== id));
-    };
 
     // Effect pour interroger l'API avec un léger debounce
     useEffect(() => {
@@ -60,8 +43,8 @@ export default function SearchPage() {
                 } else {
                     setResults([]);
                 }
-            } catch (err) {
-                if ((err as any).name !== 'AbortError') {
+            } catch (err: unknown) {
+                if (!(err instanceof DOMException && err.name === 'AbortError')) {
                     console.error(err);
                 }
             } finally {
@@ -80,7 +63,6 @@ export default function SearchPage() {
     };
 
     const inputRef = useRef<HTMLInputElement>(null);
-    const router = useRouter();
 
     return (
         <div className="h-screen flex flex-col bg-[#F8F5F2]">
