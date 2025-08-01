@@ -9,6 +9,11 @@ import { ChevronLeft, Plus, Share2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import Image from "next/image";
 import Link from "next/link";
+import { useRef } from "react";
+import Slide from "@/app/Components/navigation/Slide";
+import "@/app/scroll.css";
+import { Transition, TransitionChild } from "@headlessui/react";
+import { Fragment } from "react";
 
 interface Publication {
     _id: string;
@@ -37,6 +42,13 @@ export default function ProfilPage() {
     const [publications, setPublications] = useState<Publication[]>([]);
     const [loadingProfile, setLoadingProfile] = useState(true);
     const [loadingPublications, setLoadingPublications] = useState(true);
+
+    // viewer states
+    const [viewerIndex, setViewerIndex] = useState<number | null>(null);
+    const [activeIndex, setActiveIndex] = useState(0);
+    const observer = useRef<IntersectionObserver | null>(null);
+    const slideRefs = useRef<(HTMLDivElement | null)[]>([]);
+    const containerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         if (!id) return;
@@ -73,6 +85,43 @@ export default function ProfilPage() {
         };
         fetchPublications();
     }, [id]);
+
+    // IntersectionObserver for viewer mode
+    useEffect(() => {
+        if (viewerIndex === null) return; // only when in viewer mode
+        const currentSlideRefs = slideRefs.current;
+
+        if (publications.length === 0 || !window.IntersectionObserver) return;
+
+        observer.current = new IntersectionObserver(
+            (entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        const idx = parseInt(entry.target.getAttribute("data-index") || "0", 10);
+                        setActiveIndex(idx);
+                    }
+                });
+            },
+            { threshold: 0.6 }
+        );
+
+        Object.values(currentSlideRefs).forEach((ref) => {
+            if (ref) observer.current?.observe(ref);
+        });
+
+        return () => {
+            Object.values(currentSlideRefs).forEach((ref) => {
+                if (ref && observer.current) observer.current.unobserve(ref);
+            });
+        };
+    }, [viewerIndex, publications]);
+
+    // scroll to initial viewerIndex when viewer opens
+    useEffect(() => {
+        if (viewerIndex !== null && slideRefs.current[viewerIndex]) {
+            slideRefs.current[viewerIndex]?.scrollIntoView({ block: "start" });
+        }
+    }, [viewerIndex]);
 
     const getInitials = (name: string) => name.charAt(0).toUpperCase();
 
@@ -159,9 +208,9 @@ export default function ProfilPage() {
                             {publications.length === 0 ? (
                                 <div className="text-center py-4 col-span-2">Aucun look trouvé.</div>
                             ) : (
-                                publications.map((pub) => (
+                                publications.map((pub, index) => (
                                     pub.urlsPhotos && pub.urlsPhotos.length > 0 && (
-                                        <div key={pub._id} className="relative w-full h-60 rounded-2xl overflow-hidden bg-primary-300">
+                                        <button key={pub._id} onClick={() => setViewerIndex(index)} className="relative w-full h-60 rounded-2xl overflow-hidden bg-primary-300">
                                             <Image
                                                 src={`${process.env.NEXT_PUBLIC_API_MONGO}${pub.urlsPhotos[0]}`}
                                                 alt={`Look ${pub.description || ""}`}
@@ -169,13 +218,62 @@ export default function ProfilPage() {
                                                 sizes="(max-width: 450px) 50vw, 33vw"
                                                 className="object-cover"
                                             />
-                                        </div>
+                                        </button>
                                     )
                                 ))
                             )}
                         </div>
                     )}
                 </div>
+
+                {/* Viewer Modal */}
+                {viewerIndex !== null && (
+                    <Transition show={viewerIndex !== null} as={Fragment}>
+                        <div className="fixed inset-0 z-50 flex justify-end p-5 pt-12">
+                            <TransitionChild
+                                as={Fragment}
+                                enter="ease-out duration-200"
+                                enterFrom="opacity-0"
+                                enterTo="opacity-100"
+                                leave="ease-in duration-150"
+                                leaveFrom="opacity-100"
+                                leaveTo="opacity-0"
+                            >
+                                <div className="absolute inset-0 bg-black/40" onClick={() => setViewerIndex(null)} />
+                            </TransitionChild>
+                            <TransitionChild
+                                as={Fragment}
+                                enter="ease-out duration-300"
+                                enterFrom="translate-x-full"
+                                enterTo="translate-x-0"
+                                leave="ease-in duration-200"
+                                leaveFrom="translate-x-0"
+                                leaveTo="translate-x-full"
+                            >
+                                <div className="relative w-full max-w-[450px] h-[80vh] bg-primary-300">
+                                    <button onClick={() => setViewerIndex(null)} className="absolute top-4 left-4 z-10">
+                                        <ChevronLeft className="w-6 h-6 text-black" />
+                                    </button>
+                                    <div ref={containerRef} className="snap-y snap-mandatory overflow-y-scroll h-full invisible-scrollbar">
+                                        {publications.map((pub, index) => {
+                                            const isVisible = Math.abs(index - activeIndex) <= 1;
+                                            return (
+                                                <div
+                                                    key={pub._id}
+                                                    ref={(el) => { slideRefs.current[index] = el; }}
+                                                    data-index={index}
+                                                    className="snap-start w-full h-full"
+                                                >
+                                                    {isVisible ? <Slide publication={pub} /> : <div className="w-full h-full" />}
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            </TransitionChild>
+                        </div>
+                    </Transition>
+                )}
             </div>
         </div>
     );

@@ -1,14 +1,16 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, Fragment } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 // import CardItem from '../Components/home/CardItem';
 import Button from "@/components/atom/button";
 import Avatar from "@/components/atom/avatar";
-import { Edit, LogOut } from 'lucide-react';
+import { Edit, LogOut, ChevronLeft, Trash } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { Skeleton } from '@/components/ui/skeleton';
+import Slide from '@/app/Components/navigation/Slide';
+import { Transition, TransitionChild } from '@headlessui/react';
 
 // Type pour une publication, correspondant à l'API
 interface Publication {
@@ -33,7 +35,13 @@ export default function ProfilPage() {
     const { user, loading: authLoading } = useAuth();
     const [publications, setPublications] = useState<Publication[]>([]);
     const [publicationsLoading, setPublicationsLoading] = useState(true);
-    const [userProfile, setUserProfile] = useState<UserProfile | null>(null); // État pour le profil complet
+
+    // viewer states
+    const [viewerIndex, setViewerIndex] = useState<number | null>(null);
+    const [activeIndex, setActiveIndex] = useState(0);
+    const observer = useRef<IntersectionObserver | null>(null);
+    const slideRefs = useRef<(HTMLDivElement | null)[]>([]);
+    const containerRef = useRef<HTMLDivElement>(null);
 
     // Déclare le router avant tout return conditionnel pour respecter les règles des Hooks
     const router = useRouter();
@@ -86,6 +94,65 @@ export default function ProfilPage() {
         fetchUserPublications();
     }, [user]);
 
+    // IntersectionObserver for viewer mode
+    useEffect(() => {
+        if (viewerIndex === null) return;
+        const currentSlideRefs = slideRefs.current;
+        if (publications.length === 0 || !window.IntersectionObserver) return;
+
+        observer.current = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                    const idx = parseInt(entry.target.getAttribute('data-index') || '0', 10);
+                    setActiveIndex(idx);
+                }
+            });
+        }, { threshold: 0.6 });
+
+        Object.values(currentSlideRefs).forEach((ref) => {
+            if (ref) observer.current?.observe(ref);
+        });
+
+        return () => {
+            Object.values(currentSlideRefs).forEach((ref) => {
+                if (ref && observer.current) observer.current.unobserve(ref);
+            });
+        };
+    }, [viewerIndex, publications]);
+
+    // Scroll to selected on open
+    useEffect(() => {
+        if (viewerIndex !== null && slideRefs.current[viewerIndex]) {
+            slideRefs.current[viewerIndex]?.scrollIntoView({ block: 'start' });
+        }
+    }, [viewerIndex]);
+
+    const [userProfile, setUserProfile] = useState<UserProfile | null>(null); // État pour le profil complet
+
+    // delete confirmation
+    const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
+    const [deleting, setDeleting] = useState(false);
+
+    // Delete publication handler
+    const confirmDelete = async () => {
+        if (deleteIndex === null) return;
+        const pub = publications[deleteIndex];
+        try {
+            setDeleting(true);
+            const apiUrl = process.env.NEXT_PUBLIC_API_MONGO;
+            const res = await fetch(`${apiUrl}/api/publications/${pub._id}`, {
+                method: 'DELETE',
+            });
+            if (!res.ok) throw new Error('Erreur suppression');
+            setPublications((prev) => prev.filter((_, idx) => idx !== deleteIndex));
+            setDeleteIndex(null);
+        } catch (e) {
+            console.error(e);
+        } finally {
+            setDeleting(false);
+        }
+    };
+
     if (authLoading) {
         return <div className="flex items-center justify-center h-screen">Chargement du profil...</div>;
     }
@@ -109,8 +176,8 @@ export default function ProfilPage() {
 
     return (
         <div className="bg-[#F8F5F2] min-h-screen font-serif text-[#333]">
-            <div className="max-w-md mx-auto p-4 pt-12">
-                <button onClick={handleLogout} aria-label="Déconnexion" className="fixed top-4 right-4 flex items-center p-2">
+            <div className="max-w-md mx-auto p-4 pt-12 relative">
+                <button onClick={handleLogout} aria-label="Déconnexion" className="absolute top-4 right-4 flex items-center p-2">
                     <LogOut size={28} />
                 </button>
                 <div className="flex flex-col items-center">
@@ -178,11 +245,15 @@ export default function ProfilPage() {
                             {publications.length === 0 ? (
                                 <div className="text-center py-4 col-span-2">Aucun look trouvé.</div>
                             ) : (
-                                publications.map((pub) => (
+                                publications.map((pub, index) => (
                                     pub.urlsPhotos && pub.urlsPhotos.length > 0 && (
                                         <div
                                             key={pub._id}
-                                            className="relative w-full h-60 rounded-2xl overflow-hidden bg-primary-300"
+                                            role="button"
+                                            tabIndex={0}
+                                            onClick={() => setViewerIndex(index)}
+                                            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { setViewerIndex(index); } }}
+                                            className="relative w-full h-60 rounded-2xl overflow-hidden bg-primary-300 cursor-pointer"
                                         >
                                             <Image
                                                 src={`${process.env.NEXT_PUBLIC_API_MONGO}${pub.urlsPhotos[0]}`}
@@ -191,6 +262,13 @@ export default function ProfilPage() {
                                                 sizes="(max-width: 450px) 50vw, 33vw"
                                                 className="object-cover"
                                             />
+                                            {/* trash icon */}
+                                            <button
+                                                onClick={(e) => { e.stopPropagation(); setDeleteIndex(index); }}
+                                                className="absolute top-2 right-2 p-1 bg-black/60 rounded-full"
+                                            >
+                                                <Trash className="w-4 h-4 text-white" />
+                                            </button>
                                         </div>
                                     )
                                 ))
@@ -199,6 +277,94 @@ export default function ProfilPage() {
                     )}
                 </div>
             </div>
+
+            {/* Viewer Modal */}
+            {viewerIndex !== null && (
+                <Transition show={viewerIndex !== null} as={Fragment}>
+                    <div className="fixed inset-0 z-50 flex justify-end p-5 pt-12">
+                        <TransitionChild
+                            as={Fragment}
+                            enter="ease-out duration-200"
+                            enterFrom="opacity-0"
+                            enterTo="opacity-100"
+                            leave="ease-in duration-150"
+                            leaveFrom="opacity-100"
+                            leaveTo="opacity-0"
+                        >
+                            <div className="absolute inset-0 bg-black/40" onClick={() => setViewerIndex(null)} />
+                        </TransitionChild>
+                        <TransitionChild
+                            as={Fragment}
+                            enter="ease-out duration-300"
+                            enterFrom="translate-x-full"
+                            enterTo="translate-x-0"
+                            leave="ease-in duration-200"
+                            leaveFrom="translate-x-0"
+                            leaveTo="translate-x-full"
+                        >
+                            <div className="relative w-full max-w-[450px] h-[80vh] bg-primary-300">
+                                <button onClick={() => setViewerIndex(null)} className="absolute top-4 left-4 z-10">
+                                    <ChevronLeft className="w-6 h-6 text-black" />
+                                </button>
+                                <div ref={containerRef} className="snap-y snap-mandatory overflow-y-scroll h-full invisible-scrollbar">
+                                    {publications.map((pub, index) => {
+                                        const isVisible = Math.abs(index - activeIndex) <= 1;
+                                        return (
+                                            <div
+                                                key={pub._id}
+                                                ref={(el) => { slideRefs.current[index] = el; }}
+                                                data-index={index}
+                                                className="snap-start w-full h-full"
+                                            >
+                                                {isVisible ? <Slide publication={pub} /> : <div className="w-full h-full" />}
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        </TransitionChild>
+                    </div>
+                </Transition>
+            )}
+
+            {/* Delete confirm modal */}
+            {deleteIndex !== null && (
+                <Transition show={deleteIndex !== null} as={Fragment}>
+                    <div className="fixed inset-0 z-50 flex items-center justify-center">
+                        <TransitionChild
+                            as={Fragment}
+                            enter="ease-out duration-200"
+                            enterFrom="opacity-0"
+                            enterTo="opacity-100"
+                            leave="ease-in duration-150"
+                            leaveFrom="opacity-100"
+                            leaveTo="opacity-0"
+                        >
+                            <div className="absolute inset-0 bg-black/40" onClick={() => setDeleteIndex(null)} />
+                        </TransitionChild>
+                        <TransitionChild
+                            as={Fragment}
+                            enter="ease-out duration-300"
+                            enterFrom="scale-95 opacity-0"
+                            enterTo="scale-100 opacity-100"
+                            leave="ease-in duration-200"
+                            leaveFrom="scale-100 opacity-100"
+                            leaveTo="scale-95 opacity-0"
+                        >
+                            <div className="relative bg-white rounded-lg p-6 w-80 max-w-full">
+                                <h3 className="text-lg font-semibold mb-4">Supprimer ce look ?</h3>
+                                <p className="text-sm text-gray-600 mb-6">Cette action est irréversible.</p>
+                                <div className="flex justify-end space-x-3">
+                                    <Button variant="ghost" onClick={() => setDeleteIndex(null)}>Annuler</Button>
+                                    <Button className='text-white' variant="destructive" disabled={deleting} onClick={confirmDelete}>
+                                        {deleting ? 'Suppression...' : 'Supprimer'}
+                                    </Button>
+                                </div>
+                            </div>
+                        </TransitionChild>
+                    </div>
+                </Transition>
+            )}
         </div>
     );
 }
