@@ -284,7 +284,7 @@ export default function Slide({ publication }: SlideProps) {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ increment }),
+                body: JSON.stringify({ increment, user: user?.id }),
             });
             if (!response.ok) {
                 throw new Error('Failed to update like');
@@ -294,7 +294,7 @@ export default function Slide({ publication }: SlideProps) {
         } catch (err) {
             console.error(err);
         }
-    }, [apiUrl, currentPublication?._id]);
+    }, [apiUrl, currentPublication?._id, user]);
 
     const handleHeartToggle = useCallback(() => {
         const inc: 1 | -1 = isLiked ? -1 : 1;

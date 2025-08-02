@@ -1,17 +1,18 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Avatar from "@/components/atom/avatar";
 import Button from "@/components/atom/button";
-import { ChevronLeft, Plus, Share2 } from "lucide-react";
+import { ChevronLeft, Plus, Minus, Share2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import Image from "next/image";
-import { useRef } from "react";
 import Slide from "@/app/Components/navigation/Slide";
 import "@/app/scroll.css";
 import { Transition, TransitionChild } from "@headlessui/react";
 import { Fragment } from "react";
+import { useAuth } from "@/hooks/useAuth";
+import { useFollow } from "@/hooks/useFollow";
 
 interface Publication {
     _id: string;
@@ -39,6 +40,10 @@ export default function ProfilPage() {
     const [publications, setPublications] = useState<Publication[]>([]);
     const [loadingProfile, setLoadingProfile] = useState(true);
     const [loadingPublications, setLoadingPublications] = useState(true);
+
+    // auth & follow
+    const { user } = useAuth();
+    const { isFollowing, follow, unfollow, loading: followLoading } = useFollow(user?.id, id);
 
     // viewer states
     const [viewerIndex, setViewerIndex] = useState<number | null>(null);
@@ -183,7 +188,41 @@ export default function ProfilPage() {
                     {/* Bouton */}
                     <div className="flex flex-row w-full gap-x-3">
                         <div className="w-full">
-                            <Button onClick={() => console.log('Follow clicked!')} variant="default" className="font-outfit" iconLeft={<Plus />}>Suivre</Button>
+                            <Button
+                                onClick={async () => {
+                                    if (!user) return; // optionnel : rediriger vers login
+                                    const delta = isFollowing ? -1 : 1;
+                                    if (isFollowing) {
+                                        await unfollow();
+                                    } else {
+                                        await follow();
+                                    }
+
+                                    /* Mise à jour PG */
+                                    try {
+                                        await fetch('/api/users/followers', {
+                                            method: 'POST',
+                                            headers: { 'Content-Type': 'application/json' },
+                                            body: JSON.stringify({ userId: id, delta })
+                                        });
+                                    } catch (err) {
+                                        console.error('Erreur MAJ followers_count PG', err);
+                                    }
+
+                                    // MAJ état local
+                                    setUserProfile((prev) => {
+                                        if (!prev) return prev;
+                                        const newCount = Math.max((prev.followers_count || 0) + delta, 0);
+                                        return { ...prev, followers_count: newCount };
+                                    });
+                                }}
+                                variant={isFollowing ? "secondary" : "default"}
+                                className="font-outfit"
+                                disabled={followLoading}
+                                iconLeft={followLoading ? undefined : (isFollowing ? <Minus /> : <Plus />)}
+                            >
+                                {followLoading ? "..." : isFollowing ? "Suivi" : "Suivre"}
+                            </Button>
                         </div>
                         <div className="w-full">
                             <Button onClick={() => console.log('Share clicked!')} variant="secondary" className="font-outfit" iconLeft={<Share2 />}>Partager</Button>
