@@ -146,3 +146,52 @@ export async function searchUsers(query: string) {
     );
     return rows;
 }
+
+// ---------------------------------------------
+// Update Profile
+// ---------------------------------------------
+export interface UpdateUserProfileInput {
+    userId: string;
+    pseudo?: string;
+    bio?: string;
+    profile_picture_url?: string;
+    nom?: string;
+    prenom?: string;
+}
+
+/**
+ * Met à jour les informations de profil d'un utilisateur.
+ * Seuls les champs fournis dans l'input seront mis à jour.
+ */
+export async function updateUserProfile({ userId, pseudo, bio, profile_picture_url, nom, prenom }: UpdateUserProfileInput) {
+    // Exécuter un update unique : chaque champ n'est modifié que si un nouveau
+    // paramètre est fourni, grâce à COALESCE(param, colonne).
+    const query = `
+        UPDATE public.users
+        SET
+            pseudo               = COALESCE($2, pseudo),
+            bio                  = COALESCE($3, bio),
+            profile_picture_url  = COALESCE($4, profile_picture_url),
+            nom                  = COALESCE($5, nom),
+            prenom               = COALESCE($6, prenom),
+            updated_at           = NOW()
+        WHERE id = $1
+        RETURNING id, nom, prenom, pseudo, bio, profile_picture_url, followers_count`;
+
+    const params = [
+        userId,
+        pseudo ?? null,
+        bio ?? null,
+        profile_picture_url ?? null,
+        nom ?? null,
+        prenom ?? null,
+    ];
+
+    const { rows } = await pool.query(query, params);
+    if (rows.length === 0) {
+        console.warn('[updateUserProfile] Aucune ligne mise à jour pour id', userId);
+        return null;          // fera renvoyer 404 dans l’API
+    }
+    console.log('[updateUserProfile] Nouvelle ligne :', rows[0]);
+    return rows[0];
+}

@@ -7,7 +7,7 @@ import Button from "@/components/atom/button";
 import { ChevronLeft, Plus, Minus, Share2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import Image from "next/image";
-import Slide from "@/app/Components/navigation/Slide";
+import Slide from "@/components/navigation/Slide";
 import "@/app/scroll.css";
 import { Transition, TransitionChild } from "@headlessui/react";
 import { Fragment } from "react";
@@ -43,6 +43,13 @@ export default function ProfilPage() {
 
     // auth & follow
     const { user } = useAuth();
+    // Si l'utilisateur ouvre son propre profil via l'URL /profil/[id],
+    // on le redirige vers la page dédiée /profil pour éviter le bouton follow.
+    useEffect(() => {
+        if (user?.id && id === String(user.id)) {
+            router.replace('/profil');
+        }
+    }, [id, user?.id, router]);
     const { isFollowing, follow, unfollow, loading: followLoading } = useFollow(user?.id, id);
 
     // viewer states

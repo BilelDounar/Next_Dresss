@@ -115,7 +115,7 @@ function NotificationItem({ notification, actors }: NotificationItemProps) {
                 <Avatar
                     alt={actors[notification.from].charAt(0).toUpperCase()}
                     size="sm"
-                    src={`${process.env.NEXT_PUBLIC_API_MONGO}/uploads/${notification.from}.png`}
+                    src={notification.from.startsWith('/uploads/') ? notification.from : `${process.env.NEXT_PUBLIC_API_MONGO ?? ''}${notification.from}`}
                     clickable={true}
                     href={`/profil/${notification.from}`}
                     isFollowed={true}

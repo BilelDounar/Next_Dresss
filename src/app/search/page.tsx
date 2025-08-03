@@ -107,7 +107,7 @@ export default function SearchPage() {
                                             isFollowed={true}
                                         />
                                         <div className="flex flex-col">
-                                            <span className="text-base font-semibold">{user.nom} {user.prenom}</span>
+                                            <span className="text-base font-semibold">{user.prenom} {user.nom}</span>
                                             <span className="text-sm text-gray-500">@{user.pseudo}</span>
                                         </div>
                                     </div>

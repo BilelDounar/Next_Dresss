@@ -11,7 +11,6 @@ import { useState, useRef } from 'react';
 import AddArticleModal, { Article } from '@/components/create/AddArticleModal';
 import { useAuth } from "@/hooks/useAuth";
 
-
 export default function CreatePostPage() {
     const [selectedPhotos, setSelectedPhotos] = useState<File[]>([]);
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -20,6 +19,8 @@ export default function CreatePostPage() {
     const [tags, setTags] = useState<string[]>([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [articles, setArticles] = useState<Article[]>([]);
+    // Gestion des messages d’erreurs par champ
+    const [errors, setErrors] = useState<{ photos?: string; description?: string; tags?: string; general?: string }>({});
 
     const handleAddPhotoClick = () => {
         if (selectedPhotos.length < 10) {
@@ -55,9 +56,28 @@ export default function CreatePostPage() {
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
+        // Nettoie les erreurs précédentes
+        setErrors({});
+
         // Vérifier si l'objet user et user.id existent
         if (!user || !user.id) {
-            alert("Impossible de récupérer l'identifiant de l'utilisateur. Veuillez vous reconnecter.");
+            setErrors({ general: "Impossible de récupérer l'identifiant de l'utilisateur. Veuillez vous reconnecter." });
+            return;
+        }
+
+        // Validations côté client
+        const validationErrors: { photos?: string; description?: string; tags?: string } = {};
+        if (selectedPhotos.length === 0) {
+            validationErrors.photos = 'Une photo de publication au minimum est requise.';
+        }
+        if (tags.length === 0) {
+            validationErrors.tags = 'Veuillez sélectionner au moins un tag.';
+        }
+        if (description.trim() === '') {
+            validationErrors.description = 'La description est requise.';
+        }
+        if (Object.keys(validationErrors).length > 0) {
+            setErrors(validationErrors);
             return;
         }
 
@@ -104,12 +124,46 @@ export default function CreatePostPage() {
                 window.location.href = '/profil';
             } else {
                 const responseData = await response.json();
-                throw new Error(responseData.message || 'Une erreur est survenue lors de la publication.');
-            }
 
+                // Tentative d'extraction d'erreurs champ par champ
+                const fieldErrors: { [key: string]: string } = {};
+
+                if (responseData?.errors && typeof responseData.errors === 'object') {
+                    // Format Mongoose « Validation failed » : errors = { description: { message: '…' }, … }
+                    for (const [field, err] of Object.entries<any>(responseData.errors)) {
+                        fieldErrors[field] = err?.message || 'Champ invalide';
+                    }
+                } else if (typeof responseData?.message === 'string') {
+                    // Exemple : "Publication validation failed: description: Path `description` is required."
+                    const msg: string = responseData.message;
+                    if (/description/i.test(msg)) {
+                        fieldErrors.description = 'La description est requise.';
+                    }
+                    if (/tags?/i.test(msg)) {
+                        fieldErrors.tags = 'Veuillez sélectionner au moins un tag.';
+                    }
+                    if (/photos?/i.test(msg)) {
+                        fieldErrors.photos = 'Une photo de publication au minimum est requise.';
+                    }
+                }
+
+                if (Object.keys(fieldErrors).length > 0) {
+                    setErrors(fieldErrors);
+                } else {
+                    setErrors({ general: responseData.message || 'Une erreur est survenue lors de la publication.' });
+                }
+            }
         } catch (error) {
             console.error(error);
-            alert((error as Error).message);
+
+            if ((error as Error).message) {
+                // Utilise déjà la logique ci-dessus si handleFetch a défini des errors champ.
+                if (Object.keys(errors).length === 0) {
+                    setErrors({ general: (error as Error).message });
+                }
+            } else {
+                setErrors({ general: 'Une erreur inconnue est survenue.' });
+            }
         }
     };
 
@@ -137,6 +191,10 @@ export default function CreatePostPage() {
                 </Link>
             </header>
 
+            {errors.general && (
+                <p className="text-red-600 mb-2">{errors.general}</p>
+            )}
+
             <div>
                 <div className="mb-4">
                     <h2 className="text-2xl font-bold mb-2">Vos photos ({selectedPhotos.length}/10)</h2>
@@ -162,6 +220,7 @@ export default function CreatePostPage() {
                             </div>
                         )}
                     </div>
+                    {errors.photos && <p className="text-red-600 text-sm mt-1">{errors.photos}</p>}
                     <input
                         type="file"
                         ref={fileInputRef}
@@ -181,6 +240,7 @@ export default function CreatePostPage() {
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
                     />
+                    {errors.description && <p className="text-red-600 text-sm mt-1">{errors.description}</p>}
                 </div>
 
                 <div className="mb-4">
@@ -192,6 +252,7 @@ export default function CreatePostPage() {
                         placeholder="Sélectionnez vos styles"
                         className="w-full"
                     />
+                    {errors.tags && <p className="text-red-600 text-sm mt-1">{errors.tags}</p>}
                 </div>
 
                 <div className="mb-4">

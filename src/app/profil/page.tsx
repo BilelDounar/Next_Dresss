@@ -9,8 +9,9 @@ import { Edit, LogOut, ChevronLeft, Trash } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { Skeleton } from '@/components/ui/skeleton';
-import Slide from '@/app/Components/navigation/Slide';
+import Slide from '@/components/navigation/Slide';
 import { Transition, TransitionChild } from '@headlessui/react';
+import EditProfileModal from '@/components/profil/EditProfileModal';
 
 // Type pour une publication, correspondant à l'API
 interface Publication {
@@ -153,6 +154,32 @@ export default function ProfilPage() {
         }
     };
 
+    // Modal d'édition du profil
+    const [isEditOpen, setIsEditOpen] = useState(false);
+
+    // Sauvegarde des modifications du profil (callback pour la modal)
+    const handleProfileSave = async ({ photo, pseudo, bio, nom, prenom }: { photo: File | null; pseudo: string; bio: string; nom: string; prenom: string }) => {
+        try {
+            const formData = new FormData();
+            formData.append('pseudo', pseudo);
+            formData.append('bio', bio);
+            formData.append('nom', nom);
+            formData.append('prenom', prenom);
+            if (photo) formData.append('photo', photo);
+
+            const res = await fetch(`/api/users?id=${user?.id}`, {
+                method: 'PUT',
+                body: formData,
+            });
+            if (!res.ok) throw new Error('Erreur lors de la mise à jour du profil');
+
+            const updated: UserProfile = await res.json();
+            setUserProfile(updated);
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
     if (authLoading) {
         return <div className="flex items-center justify-center h-screen">Chargement du profil...</div>;
     }
@@ -174,6 +201,7 @@ export default function ProfilPage() {
         // router.refresh(); // Assure la mise à jour de l'état côté client
     };
 
+
     return (
         <div className="bg-[#F8F5F2] min-h-screen font-serif text-[#333]">
             <div className="max-w-md mx-auto p-4 pt-12 relative">
@@ -184,7 +212,7 @@ export default function ProfilPage() {
                     {/* Avatar */}
                     {userProfile ? (
 
-                        <Avatar src={process.env.NEXT_PUBLIC_API_MONGO + userProfile.profile_picture_url} alt={getInitials(userProfile.pseudo)} size="lg" isFollowed={true} />
+                        <Avatar src={userProfile.profile_picture_url.startsWith('/uploads/') ? userProfile.profile_picture_url : `${process.env.NEXT_PUBLIC_API_MONGO ?? ''}${userProfile.profile_picture_url}`} alt={getInitials(userProfile.pseudo)} size="lg" isFollowed={true} />
 
                     ) : (
                         <Skeleton className="w-24 h-24 rounded-full mb-4 bg-primary-300" />
@@ -227,7 +255,7 @@ export default function ProfilPage() {
 
                     {/* Bouton Modifier */}
                     <div className="w-full px-4">
-                        <Button onClick={() => console.log('Edit clicked!')} variant="default" className="font-outfit" iconLeft={<Edit />}>Modifier</Button>
+                        <Button onClick={() => setIsEditOpen(true)} variant="default" className="font-outfit" iconLeft={<Edit />}>Modifier</Button>
                     </div>
                 </div>
 
@@ -326,6 +354,20 @@ export default function ProfilPage() {
                     </div>
                 </Transition>
             )}
+
+            <EditProfileModal
+                isOpen={isEditOpen}
+                onClose={() => setIsEditOpen(false)}
+                onSave={handleProfileSave}
+                initialPseudo={userProfile?.pseudo || ''}
+                initialBio={userProfile?.bio || ''}
+                initialNom={userProfile?.nom || ''}
+                initialPrenom={userProfile?.prenom || ''}
+                initialPhotoUrl={
+                    ((userProfile?.profile_picture_url?.startsWith('/uploads/') ? '' : (process.env.NEXT_PUBLIC_API_MONGO ?? '')) +
+                        (userProfile?.profile_picture_url ?? ''))
+                }
+            />
 
             {/* Delete confirm modal */}
             {deleteIndex !== null && (
