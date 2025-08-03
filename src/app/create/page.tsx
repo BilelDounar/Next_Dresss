@@ -130,8 +130,10 @@ export default function CreatePostPage() {
 
                 if (responseData?.errors && typeof responseData.errors === 'object') {
                     // Format Mongoose « Validation failed » : errors = { description: { message: '…' }, … }
-                    for (const [field, err] of Object.entries<any>(responseData.errors)) {
-                        fieldErrors[field] = err?.message || 'Champ invalide';
+                    type FieldErr = { message?: string };
+                    const entries = Object.entries(responseData.errors as Record<string, FieldErr>);
+                    for (const [field, errVal] of entries) {
+                        fieldErrors[field] = errVal?.message || 'Champ invalide';
                     }
                 } else if (typeof responseData?.message === 'string') {
                     // Exemple : "Publication validation failed: description: Path `description` is required."

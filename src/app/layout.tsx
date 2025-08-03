@@ -73,6 +73,8 @@ export default function RootLayout({
           name="viewport"
           content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"
         />
+        {/* Next.js expose automatiquement `src/app/manifest.ts` à l'URL /manifest.webmanifest */}
+        <link rel="manifest" href="/manifest.webmanifest" />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased h-fit bg-primary-300`}

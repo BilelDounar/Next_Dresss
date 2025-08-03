@@ -62,7 +62,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         });
 
         // --- Extraction fiable des champs texte (formidable renvoie souvent un tableau)
-        const parseField = (val: any): string | undefined => {
+        const parseField = (val: unknown): string | undefined => {
           if (typeof val === 'string') return val;
           if (Array.isArray(val) && typeof val[0] === 'string') return val[0];
           return undefined;
@@ -76,7 +76,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         let profile_picture_url: string | undefined;
         let previousPhoto: string | null = null;
 
-        const uploadedFile = (files as any).photo?.[0] ?? ((files as any).photo as formidable.File | undefined);
+        // Support either single file or array returned by formidable
+        const uploadedFileField = (files as formidable.Files)['photo'];
+        const uploadedFile = Array.isArray(uploadedFileField)
+          ? uploadedFileField[0]
+          : (uploadedFileField as formidable.File | undefined);
         if (uploadedFile) {
           // Récupérer l'URL actuelle pour supprimer l'ancienne image (si on en télécharge une nouvelle)
           const prevRes = await pool.query('SELECT profile_picture_url FROM public.users WHERE id = $1', [id]);
@@ -132,7 +136,37 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return;
     }
 
-    res.setHeader("Allow", ["GET", "PUT"]);
+    // ---------------------------------------
+    // DELETE – suppression du compte utilisateur
+    // ---------------------------------------
+    if (req.method === "DELETE") {
+      const { id } = req.query;
+
+      if (!id || Array.isArray(id)) {
+        res.status(400).json({ error: "ID utilisateur invalide ou manquant" });
+        return;
+      }
+
+      try {
+        // Supprime l'utilisateur. Vous pouvez également ajouter la suppression cascade d'autres tables si nécessaire.
+        const { rowCount } = await pool.query('DELETE FROM public.users WHERE id = $1', [id]);
+
+        if (rowCount === 0) {
+          res.status(404).json({ error: "Utilisateur non trouvé" });
+          return;
+        }
+
+        // 204 No Content : la ressource a été supprimée avec succès, aucune réponse JSON
+        res.status(204).end();
+        return;
+      } catch (err) {
+        console.error('Erreur DELETE /api/users:', err);
+        res.status(500).json({ error: 'Erreur serveur' });
+        return;
+      }
+    }
+
+    res.setHeader("Allow", ["GET", "PUT", "DELETE"]);
     return res.status(405).end(`Method ${req.method} Not Allowed`);
   } catch (error) {
     console.error("API /users error:", error);

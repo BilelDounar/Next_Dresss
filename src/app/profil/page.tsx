@@ -5,13 +5,14 @@ import { useAuth } from '@/hooks/useAuth';
 // import CardItem from '../Components/home/CardItem';
 import Button from "@/components/atom/button";
 import Avatar from "@/components/atom/avatar";
-import { Edit, LogOut, ChevronLeft, Trash } from 'lucide-react';
+import { Edit, ChevronLeft, Trash, EllipsisVertical } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { Skeleton } from '@/components/ui/skeleton';
 import Slide from '@/components/navigation/Slide';
 import { Transition, TransitionChild } from '@headlessui/react';
 import EditProfileModal from '@/components/profil/EditProfileModal';
+import SettingsModal from '@/components/profil/SettingsModal';
 
 // Type pour une publication, correspondant à l'API
 interface Publication {
@@ -156,6 +157,8 @@ export default function ProfilPage() {
 
     // Modal d'édition du profil
     const [isEditOpen, setIsEditOpen] = useState(false);
+    // Settings modal
+    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
     // Sauvegarde des modifications du profil (callback pour la modal)
     const handleProfileSave = async ({ photo, pseudo, bio, nom, prenom }: { photo: File | null; pseudo: string; bio: string; nom: string; prenom: string }) => {
@@ -178,6 +181,28 @@ export default function ProfilPage() {
         } catch (err) {
             console.error(err);
         }
+    };
+
+    // Callback: change password
+    const handlePasswordChange = async (oldPw: string, newPw: string) => {
+        const res = await fetch('/api/auth/change-password', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ oldPassword: oldPw, newPassword: newPw }),
+        });
+        if (!res.ok) throw new Error('Erreur changement mot de passe');
+    };
+
+    // Callback: delete account
+    const handleDeleteAccount = async () => {
+        const res = await fetch(`/api/users?id=${user?.id}`, { method: 'DELETE' });
+        if (!res.ok) throw new Error('Erreur suppression compte');
+        await handleLogout();
+    };
+
+    // Handler to open settings / parameters modal or page
+    const handleModalParameter = () => {
+        setIsSettingsOpen(true);
     };
 
     if (authLoading) {
@@ -205,15 +230,23 @@ export default function ProfilPage() {
     return (
         <div className="bg-[#F8F5F2] min-h-screen font-serif text-[#333]">
             <div className="max-w-md mx-auto p-4 pt-12 relative">
-                <button onClick={handleLogout} aria-label="Déconnexion" className="absolute top-4 right-4 flex items-center p-2">
-                    <LogOut size={28} />
+
+                <button onClick={handleModalParameter} aria-label="Paramètres" className="absolute top-4 right-4 flex items-center p-2">
+                    <EllipsisVertical size={24} />
                 </button>
                 <div className="flex flex-col items-center">
                     {/* Avatar */}
                     {userProfile ? (
-
-                        <Avatar src={userProfile.profile_picture_url.startsWith('/uploads/') ? userProfile.profile_picture_url : `${process.env.NEXT_PUBLIC_API_MONGO ?? ''}${userProfile.profile_picture_url}`} alt={getInitials(userProfile.pseudo)} size="lg" isFollowed={true} />
-
+                        <Avatar
+                            src={userProfile.profile_picture_url
+                                ? (userProfile.profile_picture_url.startsWith('/uploads/')
+                                    ? userProfile.profile_picture_url
+                                    : `${process.env.NEXT_PUBLIC_API_MONGO ?? ''}${userProfile.profile_picture_url}`)
+                                : undefined}
+                            alt={getInitials(userProfile.pseudo)}
+                            size="lg"
+                            isFollowed={true}
+                        />
                     ) : (
                         <Skeleton className="w-24 h-24 rounded-full mb-4 bg-primary-300" />
                     )}
@@ -367,6 +400,15 @@ export default function ProfilPage() {
                     ((userProfile?.profile_picture_url?.startsWith('/uploads/') ? '' : (process.env.NEXT_PUBLIC_API_MONGO ?? '')) +
                         (userProfile?.profile_picture_url ?? ''))
                 }
+            />
+
+            {/* Settings modal */}
+            <SettingsModal
+                isOpen={isSettingsOpen}
+                onClose={() => setIsSettingsOpen(false)}
+                onPasswordChange={handlePasswordChange}
+                onDeleteAccount={handleDeleteAccount}
+                onLogout={handleLogout}
             />
 
             {/* Delete confirm modal */}
