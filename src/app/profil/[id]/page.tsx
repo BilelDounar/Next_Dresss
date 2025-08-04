@@ -11,7 +11,7 @@ import Slide from "@/components/navigation/Slide";
 import "@/app/scroll.css";
 import { Transition, TransitionChild } from "@headlessui/react";
 import { Fragment } from "react";
-import { useAuth } from "@/hooks/useAuth";
+import { useRequireAuth } from "@/hooks/useRequireAuth";
 import { useFollow } from "@/hooks/useFollow";
 
 interface Publication {
@@ -42,7 +42,7 @@ export default function ProfilPage() {
     const [loadingPublications, setLoadingPublications] = useState(true);
 
     // auth & follow
-    const { user } = useAuth();
+    const { user } = useRequireAuth();
     // Si l'utilisateur ouvre son propre profil via l'URL /profil/[id],
     // on le redirige vers la page dédiée /profil pour éviter le bouton follow.
     useEffect(() => {
@@ -152,8 +152,19 @@ export default function ProfilPage() {
                     {loadingProfile ? (
                         <Skeleton className="w-24 h-24 rounded-full mb-4 bg-primary-300" />
                     ) : (
-                        userProfile && (
-                            <Avatar src={`${process.env.NEXT_PUBLIC_API_MONGO}${userProfile.profile_picture_url}`} alt={getInitials(userProfile.pseudo)} size="lg" isFollowed={true} />
+                        userProfile ? (
+                            userProfile.profile_picture_url ? (
+                                <Avatar
+                                    src={`${process.env.NEXT_PUBLIC_API_MONGO}${userProfile.profile_picture_url}`}
+                                    alt={userProfile.pseudo ? getInitials(userProfile.pseudo) : '?'}
+                                    size="lg"
+                                    isFollowed={true}
+                                />
+                            ) : (
+                                <Avatar src="" alt="?" size="lg" isFollowed={true} />
+                            )
+                        ) : (
+                            <Avatar src="" alt="?" size="lg" isFollowed={true} />
                         )
                     )}
 
@@ -163,24 +174,34 @@ export default function ProfilPage() {
                             <Skeleton className="h-6 w-40 bg-primary-300 rounded mb-1" />
                             <Skeleton className="h-5 w-24 bg-primary-300 rounded-full mb-4" />
                         </>
-                    ) : userProfile && (
-                        <>
-                            <h1 className="text-2xl font-bold">{`${userProfile.prenom} ${userProfile.nom}`}</h1>
-                            <p className="text-gray-500 mb-4 font-outfit">@{userProfile.pseudo}</p>
-                        </>
+                    ) : (
+                        userProfile ? (
+                            <>
+                                <h1 className="text-2xl font-bold">
+                                    {(userProfile.prenom?.trim() || userProfile.nom?.trim())
+                                        ? `${userProfile.prenom?.trim() ?? ''} ${userProfile.nom?.trim() ?? ''}`.trim()
+                                        : 'Utilisateur introuvable'}
+                                </h1>
+                                {userProfile.pseudo && (
+                                    <p className="text-gray-500 mb-4 font-outfit">@{userProfile.pseudo}</p>
+                                )}
+                            </>
+                        ) : (
+                            <h1 className="text-2xl font-bold">Utilisateur introuvable</h1>
+                        )
                     )}
 
                     {/* Stats */}
                     <div className="flex space-x-8 mb-2">
                         <div className="text-center">
                             <div className="font-bold text-lg font-montserrat">
-                                {loadingProfile ? <Skeleton className="bg-primary-300 h-5 w-10 rounded" /> : userProfile?.followers_count}
+                                {loadingProfile ? <Skeleton className="bg-primary-300 h-5 w-10 rounded" /> : (userProfile ? userProfile.followers_count : 0)}
                             </div>
                             <p className="text-sm text-gray-600">Followers</p>
                         </div>
                         <div className="text-center">
                             <div className="font-bold text-lg font-montserrat">
-                                {loadingProfile ? <Skeleton className="bg-primary-300 h-5 w-10 rounded" /> : publications.length}
+                                {loadingProfile ? <Skeleton className="bg-primary-300 h-5 w-10 rounded" /> : (userProfile ? publications.length : 0)}
                             </div>
                             <p className="text-sm text-gray-600">Looks</p>
                         </div>

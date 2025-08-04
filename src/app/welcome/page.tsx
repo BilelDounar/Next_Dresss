@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Button from "@/components/atom/button";
 import { useState, useEffect } from "react";
 import InstallPromptModal from "@/components/modals/InstallPromptModal";
+import { useRedirectIfAuth } from "@/hooks/useRedirectIfAuth";
 
 // Define a type for the deferred install prompt event (subset we need)
 interface BeforeInstallPromptEvent extends Event {
@@ -20,6 +21,8 @@ declare global {
 }
 
 export default function RegisterPage() {
+    // Empêche les utilisateurs connectés d'accéder à la page publique
+    useRedirectIfAuth();
     const [showInstall, setShowInstall] = useState(false);
     const [isAndroid, setIsAndroid] = useState(false);
     const [isIOS, setIsIOS] = useState(false);

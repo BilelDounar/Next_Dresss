@@ -7,6 +7,7 @@ import Button from "@/components/atom/button";
 import { Input } from "@/components/atom/input";
 import { Select, SelectItem, SelectTrigger, SelectValue, SelectContent } from "@/components/atom/select";
 import { MultiSelect } from "@/components/atom/multi-select";
+import { useRequireAuth } from "@/hooks/useRequireAuth";
 import { useAuth } from "@/hooks/useAuth";
 
 const styleOptions = [
@@ -22,7 +23,7 @@ const styleOptions = [
 
 export default function AboutYouPage() {
     const router = useRouter();
-    const { user, loading: authLoading } = useAuth();
+    const { user, loading: authLoading, refreshUser } = useRequireAuth();
 
     useEffect(() => {
         if (!authLoading && user) {
@@ -80,6 +81,10 @@ export default function AboutYouPage() {
             });
 
             if (response.ok) {
+                // Mettre à jour les infos utilisateur pour récupérer le nouveau statut "active"
+                if (refreshUser) {
+                    await refreshUser();
+                }
                 router.push('/home');
             } else {
                 const data = await response.json();
@@ -93,7 +98,7 @@ export default function AboutYouPage() {
     };
 
     return (
-        <div className="flex flex-col h-screen items-center p-8 pt-20">
+        <div className="flex flex-col h-screen items-center p-8 pt-20 bg-[#F8F5F2]">
             <h2 className="text-2xl font-bold font-outfit mb-4 text-center">Définissez votre style</h2>
             <p className="text-center text-gray-600 mb-8 max-w-md">Aidez-nous à personnaliser votre expérience en partageant quelques informations.</p>
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { useAuth } from '@/hooks/useAuth';
+import { useRequireAuth } from '@/hooks/useRequireAuth';
 import Avatar from '@/components/atom/avatar';
 import Image from 'next/image';
 
@@ -18,7 +18,7 @@ interface Notification {
 }
 
 export default function NotificationsPage() {
-    const { user } = useAuth();
+    const { user } = useRequireAuth();
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const [loading, setLoading] = useState(true);
     const [actors, setActors] = useState<Record<string, string>>({});
@@ -108,12 +108,16 @@ function NotificationItem({ notification, actors }: NotificationItemProps) {
         ? ` a commencé à vous suivre`
         : notification.text;
 
+    // Récupère le pseudo de l'auteur de la notification (peut être indisponible)
+    const pseudo = actors[notification.from] ?? '';
+    const initial = pseudo ? pseudo.charAt(0).toUpperCase() : '?';
+
     return (
         <div className="flex justify-between items-start bg-[#F8F5F2] p-2 rounded">
             {/* Avatar + texte */}
             <div className="flex items-start gap-x-3 max-w-[70%]">
                 <Avatar
-                    alt={actors[notification.from].charAt(0).toUpperCase()}
+                    alt={initial}
                     size="sm"
                     src={notification.from.startsWith('/uploads/') ? notification.from : `${process.env.NEXT_PUBLIC_API_MONGO ?? ''}${notification.from}`}
                     clickable={true}
@@ -121,7 +125,7 @@ function NotificationItem({ notification, actors }: NotificationItemProps) {
                     isFollowed={true}
                 />
                 <p className="text-sm leading-snug line-clamp-2">
-                    <span className="font-bold">@{actors[notification.from]}</span>
+                    <span className="font-bold">@{pseudo || "Utilisateur Introuvable"}</span>
                     {message}
                 </p>
             </div>

@@ -9,13 +9,13 @@ import { Textarea } from '@/components/atom/textarea';
 import { MultiSelect } from "@/components/atom/multi-select";
 import { useState, useRef } from 'react';
 import AddArticleModal, { Article } from '@/components/create/AddArticleModal';
-import { useAuth } from "@/hooks/useAuth";
+import { useRequireAuth } from "@/hooks/useRequireAuth";
 
 export default function CreatePostPage() {
     const [selectedPhotos, setSelectedPhotos] = useState<File[]>([]);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [description, setDescription] = useState('');
-    const { user } = useAuth();
+    const { user } = useRequireAuth();
     const [tags, setTags] = useState<string[]>([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [articles, setArticles] = useState<Article[]>([]);

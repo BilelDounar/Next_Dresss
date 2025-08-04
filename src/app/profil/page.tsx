@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef, Fragment } from 'react';
-import { useAuth } from '@/hooks/useAuth';
+import { useRequireAuth } from '@/hooks/useRequireAuth';
 // import CardItem from '../Components/home/CardItem';
 import Button from "@/components/atom/button";
 import Avatar from "@/components/atom/avatar";
@@ -34,7 +34,7 @@ interface UserProfile {
 }
 
 export default function ProfilPage() {
-    const { user, loading: authLoading } = useAuth();
+    const { user, loading: authLoading, logout } = useRequireAuth();
     const [publications, setPublications] = useState<Publication[]>([]);
     const [publicationsLoading, setPublicationsLoading] = useState(true);
 
@@ -205,6 +205,19 @@ export default function ProfilPage() {
         setIsSettingsOpen(true);
     };
 
+    const handleLogout = async () => {
+        try {
+            // Inform backend (optional) but we rely on client cleanup for safety
+            await fetch('/api/auth/logout', { method: 'POST' });
+        } catch { /* ignore network errors */ }
+
+        // Clean client-side session (localStorage + React state)
+        logout();
+
+        // Redirige vers la page d’accueil publique
+        router.push('/welcome');
+    };
+
     if (authLoading) {
         return <div className="flex items-center justify-center h-screen">Chargement du profil...</div>;
     }
@@ -219,13 +232,6 @@ export default function ProfilPage() {
 
     console.log(userProfile);
     console.log(publications);
-
-    const handleLogout = async () => {
-        await fetch('/api/auth/logout', { method: 'POST' });
-        router.push('/welcome');
-        // router.refresh(); // Assure la mise à jour de l'état côté client
-    };
-
 
     return (
         <div className="bg-[#F8F5F2] min-h-screen font-serif text-[#333]">

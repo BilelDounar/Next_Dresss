@@ -9,8 +9,10 @@ import { Input } from "@/components/atom/input";
 import Button from "@/components/atom/button";
 import { ArrowLeftIcon } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { useRedirectIfAuth } from "@/hooks/useRedirectIfAuth";
 
 export default function LoginPage() {
+    useRedirectIfAuth();
     const [error, setError] = useState('');
     const router = useRouter();
     const { login } = useAuth();

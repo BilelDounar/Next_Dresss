@@ -68,10 +68,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           return undefined;
         };
 
-        const pseudo = parseField(fields.pseudo);
-        const bio = parseField(fields.bio);
-        const nom = parseField(fields.nom);
-        const prenom = parseField(fields.prenom);
+        const pseudo = parseField((fields as Record<string, unknown>).pseudo);
+        const bio = parseField((fields as Record<string, unknown>).bio);
+        const nom = parseField((fields as Record<string, unknown>).nom);
+        const prenom = parseField((fields as Record<string, unknown>).prenom);
 
         let profile_picture_url: string | undefined;
         let previousPhoto: string | null = null;
