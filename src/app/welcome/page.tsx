@@ -3,8 +3,75 @@
 
 import Image from 'next/image';
 import Button from "@/components/atom/button";
+import { useState, useEffect } from "react";
+import InstallPromptModal from "@/components/modals/InstallPromptModal";
+
+// Define a type for the deferred install prompt event (subset we need)
+interface BeforeInstallPromptEvent extends Event {
+    prompt: () => Promise<void>;
+    userChoice: Promise<{ outcome: "accepted" | "dismissed"; platform: string }>;
+}
+
+// Augment the global WindowEventMap so TS recognises the event type
+declare global {
+    interface WindowEventMap {
+        beforeinstallprompt: BeforeInstallPromptEvent;
+    }
+}
 
 export default function RegisterPage() {
+    const [showInstall, setShowInstall] = useState(false);
+    const [isAndroid, setIsAndroid] = useState(false);
+    const [isIOS, setIsIOS] = useState(false);
+    const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+
+        // Skip if already running as installed PWA
+        const nav = window.navigator as Navigator & { standalone?: boolean };
+        const isStandaloneMode = window.matchMedia('(display-mode: standalone)').matches || nav.standalone === true;
+        if (isStandaloneMode) return;
+
+        const ua = window.navigator.userAgent.toLowerCase();
+        const android = ua.includes('android');
+        const ios = /iphone|ipad|ipod/.test(ua);
+        setIsAndroid(android);
+        setIsIOS(ios);
+
+        const dismissed = localStorage.getItem('pwa_install_prompt_hidden');
+
+        // Show modal when browser fires beforeinstallprompt (Android & Desktop Chromium)
+        const handler = (e: BeforeInstallPromptEvent) => {
+            e.preventDefault();
+            setDeferredPrompt(e);
+            if (!dismissed) setShowInstall(true);
+        };
+        window.addEventListener('beforeinstallprompt', handler, { once: true });
+
+        // For iOS (Safari) there is no event, show immediately unless dismissed
+        if (ios && !dismissed) {
+            setShowInstall(true);
+        }
+
+        return () => window.removeEventListener('beforeinstallprompt', handler);
+    }, []);
+
+    const handleClose = () => {
+        setShowInstall(false);
+        localStorage.setItem('pwa_install_prompt_hidden', '1');
+    };
+
+    const handleInstall = () => {
+        if (deferredPrompt) {
+            deferredPrompt.prompt();
+            deferredPrompt.userChoice.finally(() => {
+                setDeferredPrompt(null);
+                handleClose();
+            });
+        }
+    };
+
     return (
         <div className="flex flex-col min-h-screen items-center justify-start bg-white">
             <Image
@@ -38,6 +105,13 @@ export default function RegisterPage() {
                     </div>
                 </div>
             </div>
+            <InstallPromptModal
+                show={showInstall}
+                onClose={handleClose}
+                onInstall={handleInstall}
+                isAndroid={isAndroid}
+                isIOS={isIOS}
+            />
         </div>
     );
 }

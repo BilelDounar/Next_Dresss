@@ -2,7 +2,7 @@
 
 import { usePathname } from 'next/navigation';
 import { useLayout } from '@/context/LayoutContext';
-import DockNavigationWrapper from '@/app/Components/navigation/DockNavigationWrapper';
+import DockNavigationWrapper from '@/components/navigation/DockNavigationWrapper';
 
 const noNavPaths = ['/login', '/register', '/welcome', '/about-you', '/legal', '/privacy', '/not-found', '/create'];
 

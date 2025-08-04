@@ -55,7 +55,7 @@ const MultiSelect = React.forwardRef<HTMLDivElement, MultiSelectProps>(
                     onClick={() => setIsOpen(!isOpen)}
                     onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && setIsOpen(!isOpen)}
                     className={cn(
-                        "flex h-auto min-h-10 w-full items-center justify-between rounded-md border border-input bg-transparent px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+                        "flex h-auto min-h-10 w-full items-center justify-between rounded-md border border-input bg-transparent px-3 py-2 text-base ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
                         className
                     )}
                 >
@@ -64,7 +64,7 @@ const MultiSelect = React.forwardRef<HTMLDivElement, MultiSelectProps>(
                             selected.map((value) => {
                                 const label = options.find((opt) => opt.value === value)?.label || value;
                                 return (
-                                    <div key={value} className="flex items-center gap-1 rounded-full bg-gray-200 px-2 py-1 text-xs">
+                                    <div key={value} className="flex items-center gap-1 rounded-full bg-gray-200 px-2 py-1 text-base">
                                         {label}
                                         <span
                                             role="button"

@@ -5,6 +5,10 @@
 @custom-variant dark (&:is(.dark *));
 @plugin "daisyui";
 
+html {
+  touch-action: manipulation;
+}
+
 @theme {
   --font-asap: "Asap", sans-serif;
   --font-logo: "DM Serif Text", serif;

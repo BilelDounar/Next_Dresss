@@ -26,7 +26,7 @@ const SelectTrigger = React.forwardRef<
         ref={ref}
         data-slot="select-trigger"
         className={cn(
-            "placeholder:text-muted-foreground selection:bg-primary-300 selection:text-primary-foreground dark:bg-input/30 border-input flex h-9 w-full items-center justify-between rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm font-outfit",
+            "placeholder:text-muted-foreground selection:bg-primary-300 selection:text-primary-foreground dark:bg-input/30 border-input flex h-9 w-full items-center justify-between rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-base font-outfit",
             "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] disabled:text-light-gray",
             "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
             "disabled:bg-primary-300 disabled:text-dark-gray",
@@ -81,7 +81,7 @@ const SelectLabel = React.forwardRef<
 >(({ className, ...props }, ref) => (
     <SelectPrimitive.Label
         ref={ref}
-        className={cn("py-1.5 pl-8 pr-2 text-sm font-semibold", className)}
+        className={cn("py-1.5 pl-8 pr-2 text-base font-semibold", className)}
         {...props}
     />
 ))
@@ -94,7 +94,7 @@ const SelectItem = React.forwardRef<
     <SelectPrimitive.Item
         ref={ref}
         className={cn(
-            "relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+            "relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-base outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
             className
         )}
         {...props}

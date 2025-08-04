@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, Fragment } from "react";
+import { useEffect, useRef, useState, Fragment, useCallback } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import HomeBagIcon from "../home/HomeBagIcon";
 import { Transition } from '@headlessui/react'
@@ -9,6 +9,7 @@ import ActionButton from "../home/ActionButton";
 import { BookmarkIcon, CommentIcon, HeartIcon, ShareIcon } from "../home/ActionIconSVG";
 import Image from 'next/image';
 import Avatar from "@/components/atom/avatar";
+import { Skeleton } from "@/components/ui/skeleton";
 
 // Type pour un article
 type Article = {
@@ -27,11 +28,28 @@ type Publication = {
     user: string;
     urlsPhotos?: string[];
     articles?: Article[];
+    likes?: number;
+    saved?: number;
+    shares?: number;
+    comments?: number;
 };
 
 // Type pour les props du composant Slide
 type SlideProps = {
     publication: Publication;
+};
+
+
+interface UserProfile {
+    id: number;
+    nom: string;
+    prenom: string;
+    pseudo: string;
+    profile_picture_url: string;
+}
+
+const getInitials = (name: string) => {
+    return name.charAt(0).toUpperCase();
 };
 
 export default function Slide({ publication }: SlideProps) {
@@ -49,6 +67,9 @@ export default function Slide({ publication }: SlideProps) {
     const [articles, setArticles] = useState<Article[]>([]);
     const [loadingArticles, setLoadingArticles] = useState(true);
     const [creatorPseudo, setCreatorPseudo] = useState('');
+
+    const [userProfile, setUserProfile] = useState<UserProfile | null>(null); // État pour le profil complet
+
 
     // La publication actuelle est directement celle passée en props.
     const currentPublication = publication;
@@ -123,6 +144,29 @@ export default function Slide({ publication }: SlideProps) {
         fetchCreatorPseudo();
     }, [currentPublication]);
 
+    // Récupère le profil complet du créateur de la publication
+    useEffect(() => {
+        const fetchUserProfile = async () => {
+            if (!currentPublication?.user) {
+                setUserProfile(null);
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/users?id=${currentPublication.user}`);
+                if (!response.ok) {
+                    throw new Error('Failed to fetch user profile');
+                }
+                const data: UserProfile = await response.json();
+                setUserProfile(data);
+            } catch (error) {
+                console.error('Erreur lors de la récupération du profil utilisateur :', error);
+                setUserProfile(null);
+            }
+        };
+
+        fetchUserProfile();
+    }, [currentPublication]);
 
     // Calcule le nombre de diapositives en toute sécurité.
     const slidesCount = currentPublication?.urlsPhotos?.length || 0;
@@ -227,9 +271,46 @@ export default function Slide({ publication }: SlideProps) {
     }, [dragOffset, isDragging]);
 
     const [isLiked, setIsLiked] = useState(false);
+    const [likesCount, setLikesCount] = useState<number>(publication.likes ?? 0);
     const [isSaved, setIsSaved] = useState(false);
     const [isAnimatingHeart, setIsAnimatingHeart] = useState(false);
     const [isAnimatingMark, setIsAnimatingMark] = useState(false);
+    const apiUrl = process.env.NEXT_PUBLIC_API_MONGO;
+
+    const updateLike = useCallback(async (increment: 1 | -1) => {
+        try {
+            const response = await fetch(`${apiUrl}/api/publications/${currentPublication?._id}/like`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ increment, user: user?.id }),
+            });
+            if (!response.ok) {
+                throw new Error('Failed to update like');
+            }
+            const data = await response.json();
+            setLikesCount(data.likes);
+        } catch (err) {
+            console.error(err);
+        }
+    }, [apiUrl, currentPublication?._id, user]);
+
+    const handleHeartToggle = useCallback(() => {
+        const inc: 1 | -1 = isLiked ? -1 : 1;
+        setIsLiked(!isLiked);
+        setLikesCount(prev => prev + inc);
+        updateLike(inc);
+        setIsAnimatingHeart(true);
+        setTimeout(() => setIsAnimatingHeart(false), 200);
+    }, [isLiked, updateLike]);
+
+    const handleDoubleTap = useCallback(() => {
+        if (!isLiked) {
+            handleHeartToggle();
+        }
+    }, [isLiked, handleHeartToggle]);
+
     const actions = [
         {
             icon: (
@@ -237,28 +318,24 @@ export default function Slide({ publication }: SlideProps) {
                     <HeartIcon fill={isLiked ? "red" : "white"} />
                 </div>
             ),
-            count: 500,
-            onClick: () => {
-                setIsLiked(!isLiked);
-                setIsAnimatingHeart(true);
-                setTimeout(() => setIsAnimatingHeart(false), 200); // réinitialise après 200ms
-            },
+            count: likesCount,
+            onClick: handleHeartToggle,
         },
         {
             icon: <CommentIcon fill="white" />,
-            count: 120,
+            count: publication.comments,
             onClick: () => console.log("comment"),
         },
         {
             icon: <ShareIcon fill="white" />,
-            count: 75,
+            count: publication.shares,
             onClick: () => console.log("share"),
         },
         {
             icon: <div className={`transition-transform duration-200 ease-out ${isAnimatingMark ? "scale-125" : "scale-100"}`}>
                 <BookmarkIcon fill={isSaved ? "yellow" : "white"} />
             </div>,
-            count: 520,
+            count: publication.saved,
             onClick: () => {
                 setIsSaved(!isSaved);
                 setIsAnimatingMark(true);
@@ -272,7 +349,7 @@ export default function Slide({ publication }: SlideProps) {
             ref={containerRef}
             className="w-full h-full flex flex-col relative bg-primary-300" // Taille contrôlée par le parent, fond noir
         >
-            <div className="absolute bottom-36 right-4 flex flex-col justify-center items-center gap-y-5 z-10">
+            <div className="absolute bottom-36 right-4 flex flex-col justify-center items-center gap-y-5 z-20">
                 {actions.map(({ icon, count, onClick }, index) => (
                     <ActionButton
                         key={index}
@@ -283,16 +360,18 @@ export default function Slide({ publication }: SlideProps) {
                 ))}
             </div>
 
+            {/* Images */}
             <div
                 ref={horizontalRef}
-                className="flex overflow-x-scroll snap-x snap-mandatory w-full h-full invisible-scrollbar"
+                className="flex overflow-x-scroll snap-x snap-mandatory w-full h-full invisible-scrollbar z-0"
                 onScroll={handleScroll}
             >
                 {currentPublication?.urlsPhotos?.map((url, idx) => (
                     <div
                         key={`${currentPublication._id}-${idx}`}
-                        className="snap-start w-full h-full flex-shrink-0 relative flex items-center justify-center" // Assure un fond noir pour l'image
+                        className="snap-start w-full h-full flex-shrink-0 relative flex items-center justify-center"
                         style={{ minWidth: "100%" }}
+                        onDoubleClick={handleDoubleTap}
                     >
                         <Image
                             src={`${process.env.NEXT_PUBLIC_API_MONGO}${url}`}
@@ -304,7 +383,10 @@ export default function Slide({ publication }: SlideProps) {
                 ))}
             </div>
 
-            <div className="absolute bottom-22 left-1/2 transform -translate-x-1/2 flex gap-2 z-10">
+            {/* Gradient overlay entre l'image et les éléments d'interface */}
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-gray-500/30  to-transparent/100 overflow-hidden z-10" />
+
+            <div className="absolute bottom-22 left-1/2 transform -translate-x-1/2 flex gap-2 z-20">
                 {dotIndices().map((idx) => (
                     <span
                         key={idx}
@@ -314,15 +396,22 @@ export default function Slide({ publication }: SlideProps) {
             </div>
 
             {currentPublication && (
-                <div className="absolute bottom-4 px-4 w-full flex justify-between items-center z-10">
-                    <div className="flex flex-row gap-4">
-                        <Avatar src="https://avatars.githubusercontent.com/u/105309377?v=4" alt="BD" size="md" isFollowed={false} onClick={() => console.log("clicked")} />
+                <div className="absolute bottom-4 px-4 w-full flex justify-between items-center z-20">
+                    <div className="flex flex-row justify-center items-center gap-4">
+                        {userProfile ? (
+
+                            <Avatar clickable={true} href={`/profil/${userProfile.id}`} src={userProfile.profile_picture_url.startsWith('/uploads/') ? userProfile.profile_picture_url : `${process.env.NEXT_PUBLIC_API_MONGO ?? ''}${userProfile.profile_picture_url}`} alt={getInitials(userProfile.pseudo)} size="md" isFollowed={true} />
+
+                        ) : (
+                            <Skeleton className="w-12 h-12 rounded-full mb-4 bg-white" />
+                        )}
+
                         <div>
                             <h2 className="text-white font-bold text-lg truncate w-full">
-                                {creatorPseudo || 'Chargement...'}
+                                {creatorPseudo || <Skeleton className="bg-white h-5 w-24 rounded" />}
                             </h2>
                             <p className="text-white font-normal text-md truncate w-full    ">
-                                {currentPublication.description}
+                                {currentPublication.description || <Skeleton className="bg-white h-5 w-24 rounded" />}
                             </p>
                         </div>
                     </div>

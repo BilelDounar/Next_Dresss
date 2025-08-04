@@ -28,6 +28,7 @@ export default function AddArticleModal({ isOpen, onClose, onAddArticle }: AddAr
     const [description, setDescription] = useState('');
     const [price, setPrice] = useState('');
     const [link, setLink] = useState('');
+    const [errors, setErrors] = useState<{ photo?: string; title?: string }>({});
     const photoInputRef = useRef<HTMLInputElement>(null);
 
     const resetForm = () => {
@@ -36,12 +37,20 @@ export default function AddArticleModal({ isOpen, onClose, onAddArticle }: AddAr
         setDescription('');
         setPrice('');
         setLink('');
+        setErrors({});
     };
 
     const handleAddArticle = () => {
-        if (!title || !articlePhoto) {
-            // Optionnel: ajouter une alerte ou une validation plus poussée
-            alert('Veuillez ajouter un titre et une photo.');
+        // Valide les champs requis
+        const fieldErrors: { photo?: string; title?: string } = {};
+        if (!articlePhoto) {
+            fieldErrors.photo = 'Une photo d\'article est requise.';
+        }
+        if (!title.trim()) {
+            fieldErrors.title = 'Le titre est requis.';
+        }
+        if (Object.keys(fieldErrors).length > 0) {
+            setErrors(fieldErrors);
             return;
         }
         onAddArticle({ photo: articlePhoto, title, description, price, link });
@@ -86,11 +95,13 @@ export default function AddArticleModal({ isOpen, onClose, onAddArticle }: AddAr
                         <Plus className="w-8 h-8 text-stone-500" />
                     )}
                 </div>
+                {errors.photo && <p className="text-red-600 text-sm mt-1">{errors.photo}</p>}
                 <input type="file" ref={photoInputRef} onChange={handlePhotoChange} className="hidden" accept="image/png, image/jpeg, image/jpg" />
 
                 <div className="mb-4">
                     <h2 className="font-serif text-2xl font-bold mb-2">Titre</h2>
                     <Input placeholder="Titre" value={title} onChange={(e) => setTitle(e.target.value)} />
+                    {errors.title && <p className="text-red-600 text-sm mt-1">{errors.title}</p>}
                 </div>
 
                 <div className="mb-4">

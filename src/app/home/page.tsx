@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from 'next/navigation';
-import Slide from "@/app/Components/navigation/Slide";
+import Slide from "@/components/navigation/Slide";
 import { useAuth } from "@/hooks/useAuth";
 import "@/app/scroll.css";
 
