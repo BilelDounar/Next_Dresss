@@ -43,7 +43,7 @@ export default function PushPromptModal({ show, onAccept, onClose }: PushPromptM
                                 Activer les notifications ?
                             </DialogTitle>
                             <p className="text-sm text-gray-700 mb-6">
-                                Recevez des mises à jour instantanées même lorsque l'application est fermée.
+                                Recevez des mises à jour instantanées même lorsque l&apos;application est fermée.
                             </p>
                             <div className="flex gap-3">
                                 <Button variant="secondary" className="flex-1" onClick={onClose}>

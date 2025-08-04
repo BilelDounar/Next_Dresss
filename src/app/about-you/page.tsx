@@ -8,7 +8,6 @@ import { Input } from "@/components/atom/input";
 import { Select, SelectItem, SelectTrigger, SelectValue, SelectContent } from "@/components/atom/select";
 import { MultiSelect } from "@/components/atom/multi-select";
 import { useRequireAuth } from "@/hooks/useRequireAuth";
-import { useAuth } from "@/hooks/useAuth";
 
 const styleOptions = [
     { value: "streetwear", label: "Streetwear" },

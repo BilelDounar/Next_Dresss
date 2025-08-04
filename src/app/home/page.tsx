@@ -68,7 +68,7 @@ export default function HomePage() {
             // S'assurer que l'on reste sur /home (utile si l'utilisateur arrive d'une autre route)
             router.push('/home');
         }
-    }, [user, authLoading, authError, router]);
+    }, [user, authLoading, authError, router, refreshUser]);
 
     useEffect(() => {
         const fetchPublications = async () => {

@@ -47,7 +47,7 @@ export default function VerifyPage() {
         };
 
         fetchUserStatus();
-    }, [router]);
+    }, [router, refreshUser]);
 
     const handleResendEmail = async () => {
         setResendStatus('sending');
