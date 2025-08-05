@@ -91,7 +91,7 @@ interface NotificationItemProps {
     actors: Record<string, string>;
 }
 
-function NotificationItem({ notification, actors }: NotificationItemProps) {
+export function NotificationItem({ notification, actors }: NotificationItemProps) {
     const formatRelative = (dateStr: string) => {
         const diffMs = Date.now() - new Date(dateStr).getTime();
         const sec = Math.floor(diffMs / 1000);
