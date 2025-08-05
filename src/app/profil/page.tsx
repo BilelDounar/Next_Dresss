@@ -5,7 +5,7 @@ import { useRequireAuth } from '@/hooks/useRequireAuth';
 // import CardItem from '../Components/home/CardItem';
 import Button from "@/components/atom/button";
 import Avatar from "@/components/atom/avatar";
-import { Edit, ChevronLeft, Trash, EllipsisVertical } from 'lucide-react';
+import { Edit, ChevronLeft, Trash, EllipsisVertical, Bookmark } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -13,6 +13,7 @@ import Slide from '@/components/navigation/Slide';
 import { Transition, TransitionChild } from '@headlessui/react';
 import EditProfileModal from '@/components/profil/EditProfileModal';
 import SettingsModal from '@/components/profil/SettingsModal';
+import Link from 'next/link';
 
 // Type pour une publication, correspondant à l'API
 interface Publication {
@@ -237,6 +238,11 @@ export default function ProfilPage() {
         <div className="bg-[#F8F5F2] min-h-screen font-serif text-[#333]">
             <div className="max-w-md mx-auto p-4 pt-12 relative">
 
+                {/* Lien vers les éléments sauvegardés */}
+                <Link href="/saves" aria-label="Sauvegardes" className="absolute top-4 left-4 flex items-center p-2">
+                    <Bookmark size={24} />
+                </Link>
+
                 <button onClick={handleModalParameter} aria-label="Paramètres" className="absolute top-4 right-4 flex items-center p-2">
                     <EllipsisVertical size={24} />
                 </button>
@@ -348,7 +354,7 @@ export default function ProfilPage() {
             {/* Viewer Modal */}
             {viewerIndex !== null && (
                 <Transition show={viewerIndex !== null} as={Fragment}>
-                    <div className="fixed inset-0 z-50 flex justify-end p-5 pt-12">
+                    <div className="fixed inset-0 z-50 flex justify-center items-center p-5 pt-0">
                         <TransitionChild
                             as={Fragment}
                             enter="ease-out duration-200"

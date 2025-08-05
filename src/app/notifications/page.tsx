@@ -133,10 +133,10 @@ function NotificationItem({ notification, actors }: NotificationItemProps) {
             {/* preview + time */}
             <div className="flex flex-row items-center justify-center gap-x-2">
                 {/* Si on a un visuel (ex: like sur un look) */}
-                {notification.targetType === 'post' && (
+                {notification.targetType === 'post' && notification.targetId && (
                     <Image
-                        src={`${process.env.NEXT_PUBLIC_API_MONGO}${notification.targetId}`}
-                        alt="Préview"
+                        src={`${process.env.NEXT_PUBLIC_API_MONGO ?? ''}${notification.targetId.startsWith('/') ? '' : '/'}${notification.targetId}`}
+                        alt="Publication"
                         width={48}
                         height={48}
                         className="rounded object-cover size-12"
