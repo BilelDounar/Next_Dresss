@@ -10,6 +10,7 @@ import { BookmarkIcon, CommentIcon, HeartIcon, ShareIcon } from "../home/ActionI
 import Image from 'next/image';
 import Avatar from "@/components/atom/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
+import CommentsModal from "@/components/modals/CommentsModal";
 
 // Type pour un article
 type Article = {
@@ -67,6 +68,10 @@ export default function Slide({ publication }: SlideProps) {
     const [articles, setArticles] = useState<Article[]>([]);
     const [loadingArticles, setLoadingArticles] = useState(true);
     const [creatorPseudo, setCreatorPseudo] = useState('');
+
+    // Comment modal state
+    const [isCommentsOpen, setIsCommentsOpen] = useState(false);
+    const [commentsCount, setCommentsCount] = useState<number>(publication.comments ?? 0);
 
     const [userProfile, setUserProfile] = useState<UserProfile | null>(null); // État pour le profil complet
 
@@ -323,8 +328,8 @@ export default function Slide({ publication }: SlideProps) {
         },
         {
             icon: <CommentIcon fill="white" />,
-            count: publication.comments,
-            onClick: () => console.log("comment"),
+            count: commentsCount,
+            onClick: () => setIsCommentsOpen(true),
         },
         {
             icon: <ShareIcon fill="white" />,
@@ -400,7 +405,18 @@ export default function Slide({ publication }: SlideProps) {
                     <div className="flex flex-row justify-center items-center gap-4">
                         {userProfile ? (
 
-                            <Avatar clickable={true} href={`/profil/${userProfile.id}`} src={userProfile.profile_picture_url.startsWith('/uploads/') ? userProfile.profile_picture_url : `${process.env.NEXT_PUBLIC_API_MONGO ?? ''}${userProfile.profile_picture_url}`} alt={getInitials(userProfile.pseudo)} size="md" isFollowed={true} />
+                            <Avatar
+                                clickable={true}
+                                href={`/profil/${userProfile.id}`}
+                                src={
+                                    userProfile.profile_picture_url?.startsWith('/uploads/')
+                                        ? userProfile.profile_picture_url
+                                        : `${process.env.NEXT_PUBLIC_API_MONGO ?? ''}${userProfile.profile_picture_url ?? ''}`
+                                }
+                                alt={getInitials(userProfile.pseudo ?? '')}
+                                size="md"
+                                isFollowed={true}
+                            />
 
                         ) : (
                             <Skeleton className="w-12 h-12 rounded-full mb-4 bg-white" />
@@ -481,6 +497,14 @@ export default function Slide({ publication }: SlideProps) {
                     </Transition>
                 </div>
             </Transition>
+
+            {/* Comments modal */}
+            <CommentsModal
+                show={isCommentsOpen}
+                onClose={() => setIsCommentsOpen(false)}
+                postId={currentPublication._id}
+                onAdded={() => setCommentsCount((c) => c + 1)}
+            />
         </div>
     );
 }
