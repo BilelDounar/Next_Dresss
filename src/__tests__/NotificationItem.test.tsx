@@ -1,12 +1,12 @@
-import React from 'react';
+import React, { type ImgHTMLAttributes } from 'react';
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
-import { NotificationItem } from '@/app/notifications/page';
+import NotificationItem from '@/components/notifications/NotificationItem';
 
 // Mock Next.js <Image /> component
 vi.mock('next/image', () => {
     return {
-        default: (props: any) => {
+        default: (props: ImgHTMLAttributes<HTMLImageElement>) => {
             // eslint-disable-next-line jsx-a11y/alt-text
             return <img {...props} />;
         },
@@ -20,9 +20,22 @@ vi.mock('@/components/atom/avatar', () => {
     };
 });
 
+// Minimal notification type for tests to avoid `any`
+interface Notification {
+    _id: string;
+    user: string;
+    from: string;
+    kind: string;
+    text: string;
+    targetId: string | null;
+    targetType: string | null;
+    seen: boolean;
+    createdAt: string;
+}
+
 describe('NotificationItem', () => {
     it('affiche le pseudo et le message de follow', () => {
-        const fakeNotification = {
+        const fakeNotification: Notification = {
             _id: '1',
             user: 'u1',
             from: 'u2',
@@ -32,7 +45,7 @@ describe('NotificationItem', () => {
             targetType: null,
             seen: false,
             createdAt: new Date().toISOString(),
-        } as any;
+        };
 
         const actors = {
             u2: 'Alice',

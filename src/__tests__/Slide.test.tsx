@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { type ImgHTMLAttributes } from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import Slide from '@/components/navigation/Slide';
@@ -7,8 +7,8 @@ import Slide from '@/components/navigation/Slide';
 vi.mock('next/image', () => {
     return {
         __esModule: true,
-        default: (props: any) => {
-            // eslint-disable-next-line jsx-a11y/alt-text
+        default: (props: ImgHTMLAttributes<HTMLImageElement>) => {
+            // eslint-disable-next-line jsx-a11y/alt-text, @next/next/no-img-element
             return <img {...props} />;
         },
     };
@@ -61,16 +61,26 @@ afterEach(() => {
     vi.restoreAllMocks();
 });
 
+// Minimal publication type for tests to avoid `any`
+interface Publication {
+    _id: string;
+    description: string;
+    user: string;
+    urlsPhotos: string[];
+    likes: number;
+    comments: number;
+}
+
 describe('Slide', () => {
     it('render les images de la publication', async () => {
-        const publication = {
+        const publication: Publication = {
             _id: 'pub1',
             description: 'Une belle publication',
             user: 'u2',
             urlsPhotos: ['/uploads/photo1.jpg', '/uploads/photo2.jpg'],
             likes: 3,
             comments: 1,
-        } as any;
+        };
 
         render(<Slide publication={publication} />);
 
