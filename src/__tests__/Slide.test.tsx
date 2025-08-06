@@ -14,7 +14,6 @@ vi.mock('next/image', () => {
     };
 });
 
-// Mock authentication hook
 vi.mock('@/hooks/useAuth', () => {
     return {
         useAuth: () => ({
@@ -28,7 +27,6 @@ vi.mock('@/hooks/useAuth', () => {
     };
 });
 
-// Mock save hook
 vi.mock('@/hooks/useSave', () => {
     return {
         __esModule: true,
@@ -39,7 +37,6 @@ vi.mock('@/hooks/useSave', () => {
     };
 });
 
-// Mock Avatar to avoid router dependency
 vi.mock('@/components/atom/avatar', () => {
     return {
         __esModule: true,
@@ -47,14 +44,12 @@ vi.mock('@/components/atom/avatar', () => {
     };
 });
 
-// Mock Next.js app router used inside Avatar
 vi.mock('next/navigation', () => {
     return {
         useRouter: () => ({ push: vi.fn(), prefetch: vi.fn() }),
     };
 });
 
-// Simple global.fetch mock that always succeeds
 beforeEach(() => {
     global.fetch = vi.fn().mockResolvedValue({
         ok: true,

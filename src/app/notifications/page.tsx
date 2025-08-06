@@ -130,9 +130,7 @@ export function NotificationItem({ notification, actors }: NotificationItemProps
                 </p>
             </div>
 
-            {/* preview + time */}
             <div className="flex flex-row items-center justify-center gap-x-2">
-                {/* Si on a un visuel (ex: like sur un look) */}
                 {notification.targetType === 'post' && notification.targetId && (
                     <Image
                         src={`${process.env.NEXT_PUBLIC_API_MONGO ?? ''}${notification.targetId.startsWith('/') ? '' : '/'}${notification.targetId}`}

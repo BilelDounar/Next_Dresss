@@ -76,12 +76,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const login = async (data: LoginData) => {
         try {
             if ('email' in data) {
-                // credentials provided, call backend
                 const response = await axios.post(`${process.env.NEXT_PUBLIC_API_MONGO}/auth/login`, data);
                 const { user, token } = response.data;
                 handleAuth(user, token);
             } else if ('user' in data && 'token' in data) {
-                // already authenticated payload
                 handleAuth(data.user, data.token);
             }
         } catch (err) {

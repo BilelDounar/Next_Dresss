@@ -146,7 +146,7 @@ export default function HomePage() {
     // Affiche un état de chargement si l'authentification est en cours ou si l'utilisateur va être redirigé
     if (authLoading || (user && user.status === 'pending')) {
         return (
-            <div className="h-screen flex items-center justify-center">
+            <div className="h-screen flex items-center justify-center text-black">
                 <p>Chargement...</p>
             </div>
         );

@@ -38,7 +38,6 @@ export default function LoginPage() {
                 throw new Error(data.error || "Email ou mot de passe incorrect.");
             }
 
-            // Appel correct : on passe l'objet utilisateur (data.user) et le token (data.token)
             login({ user: data.user, token: data.token });
 
             if (data.user.status === 'pending') {

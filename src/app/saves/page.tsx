@@ -50,7 +50,6 @@ export default function SavesPage() {
     const slideRefs = useRef<(HTMLDivElement | null)[]>([]);
     const containerRef = useRef<HTMLDivElement>(null);
 
-    // Fetch saves
     useEffect(() => {
         if (!user) return;
 
@@ -122,7 +121,6 @@ export default function SavesPage() {
         };
     }, [viewerIndex, savedPublications]);
 
-    // Scroll to selected on open
     useEffect(() => {
         if (viewerIndex !== null && slideRefs.current[viewerIndex]) {
             slideRefs.current[viewerIndex]?.scrollIntoView({ block: "start" });

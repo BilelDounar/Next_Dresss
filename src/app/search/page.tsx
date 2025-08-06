@@ -23,8 +23,6 @@ export default function SearchPage() {
     const [results, setResults] = useState<UserResult[]>([]);
     const [loading, setLoading] = useState(false);
 
-
-    // Effect pour interroger l'API avec un léger debounce
     useEffect(() => {
         const controller = new AbortController();
 
@@ -52,7 +50,7 @@ export default function SearchPage() {
             } finally {
                 setLoading(false);
             }
-        }, 400); // 400ms debounce
+        }, 400);
 
         return () => {
             clearTimeout(timeout);

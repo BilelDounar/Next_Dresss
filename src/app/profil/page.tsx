@@ -351,7 +351,6 @@ export default function ProfilPage() {
                 </div>
             </div>
 
-            {/* Viewer Modal */}
             {viewerIndex !== null && (
                 <Transition show={viewerIndex !== null} as={Fragment}>
                     <div className="fixed inset-0 z-50 flex justify-center items-center p-5 pt-0">
@@ -414,7 +413,6 @@ export default function ProfilPage() {
                 }
             />
 
-            {/* Settings modal */}
             <SettingsModal
                 isOpen={isSettingsOpen}
                 onClose={() => setIsSettingsOpen(false)}
@@ -423,7 +421,6 @@ export default function ProfilPage() {
                 onLogout={handleLogout}
             />
 
-            {/* Delete confirm modal */}
             {deleteIndex !== null && (
                 <Transition show={deleteIndex !== null} as={Fragment}>
                     <div className="fixed inset-0 z-50 flex items-center justify-center">

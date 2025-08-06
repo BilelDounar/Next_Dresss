@@ -40,9 +40,7 @@ describe('NotificationItem', () => {
 
         render(<NotificationItem notification={fakeNotification} actors={actors} />);
 
-        // Le pseudo est précédé de @
         expect(screen.getByText('@Alice')).toBeInTheDocument();
-        // Le message de follow doit apparaître
         expect(screen.getByText(/a commencé à vous suivre/)).toBeInTheDocument();
     });
 });
