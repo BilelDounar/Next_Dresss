@@ -84,8 +84,9 @@ npm run storybook
 
 ## 🔧 À venir (TODO)
 
-- Interface d’administration
-- Intégration OAuth (Google, Apple…)
-- Multilingue (i18n)
+- Authentification via Google/ Apple
+- Fonctionnalité de partage
+- Feed  ‘Suivi’
+- Notification système
 
 
