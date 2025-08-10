@@ -99,7 +99,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           const filename = `${id}-profil-${timestamp}-${randomStr}${fileExt}`;
 
           const destPath = path.join(uploadsDir, filename);
-          await fs.promises.rename(uploadedFile.filepath, destPath);
+
+          // Déplacement sécurisé : certains environnements (ex. volumes Docker) provoquent une
+          // erreur EXDEV lors d'un rename entre devices. On gère ce cas en fallback copy/unlink.
+          try {
+            await fs.promises.rename(uploadedFile.filepath, destPath);
+          } catch (err: any) {
+            if (err?.code === 'EXDEV') {
+              // Fallback: copie puis suppression du fichier temporaire
+              await fs.promises.copyFile(uploadedFile.filepath, destPath);
+              await fs.promises.unlink(uploadedFile.filepath);
+            } else {
+              throw err;
+            }
+          }
+
           // On stocke l'URL AVEC un slash initial pour qu'elle soit considérée valide par Next/Image
           profile_picture_url = `/uploads/${filename}`;
         }
