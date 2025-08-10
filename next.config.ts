@@ -12,13 +12,11 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: 'dresss.cloud',
-        port: '443',
         pathname: '/**',
       },
       {
         protocol: 'https',
         hostname: 'api.dresss.cloud',
-        port: '443',
         pathname: '/**',
       },
       {
