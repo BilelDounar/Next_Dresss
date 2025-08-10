@@ -45,7 +45,7 @@ export default function NotificationItem({ notification, actors }: NotificationI
                 <Avatar
                     alt={initial}
                     size="sm"
-                    src={notification.from.startsWith('/uploads/') ? notification.from : `${process.env.NEXT_PUBLIC_API_MONGO ?? ''}${notification.from}`}
+                    src={notification.from || undefined}
                     clickable={true}
                     href={`/profil/${notification.from}`}
                     isFollowed={true}

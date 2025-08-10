@@ -250,11 +250,7 @@ export default function ProfilPage() {
                     {/* Avatar */}
                     {userProfile ? (
                         <Avatar
-                            src={userProfile.profile_picture_url
-                                ? (userProfile.profile_picture_url.startsWith('/uploads/')
-                                    ? userProfile.profile_picture_url
-                                    : `${process.env.NEXT_PUBLIC_API_MONGO ?? ''}${userProfile.profile_picture_url}`)
-                                : undefined}
+                            src={userProfile.profile_picture_url || undefined}
                             alt={getInitials(userProfile.pseudo)}
                             size="lg"
                             isFollowed={true}
@@ -407,10 +403,7 @@ export default function ProfilPage() {
                 initialBio={userProfile?.bio || ''}
                 initialNom={userProfile?.nom || ''}
                 initialPrenom={userProfile?.prenom || ''}
-                initialPhotoUrl={
-                    ((userProfile?.profile_picture_url?.startsWith('/uploads/') ? '' : (process.env.NEXT_PUBLIC_API_MONGO ?? '')) +
-                        (userProfile?.profile_picture_url ?? ''))
-                }
+                initialPhotoUrl={userProfile?.profile_picture_url ?? ''}
             />
 
             <SettingsModal

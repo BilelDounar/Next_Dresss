@@ -426,11 +426,7 @@ export default function Slide({ publication }: SlideProps) {
                             <Avatar
                                 clickable={true}
                                 href={`/profil/${userProfile.id}`}
-                                src={
-                                    userProfile.profile_picture_url?.startsWith('/uploads/')
-                                        ? userProfile.profile_picture_url
-                                        : `${process.env.NEXT_PUBLIC_API_MONGO ?? ''}${userProfile.profile_picture_url ?? ''}`
-                                }
+                                src={userProfile.profile_picture_url || undefined}
                                 alt={getInitials(userProfile.pseudo ?? '')}
                                 size="md"
                                 isFollowed={true}

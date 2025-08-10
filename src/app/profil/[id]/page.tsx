@@ -155,7 +155,7 @@ export default function ProfilPage() {
                         userProfile ? (
                             userProfile.profile_picture_url ? (
                                 <Avatar
-                                    src={`${process.env.NEXT_PUBLIC_API_MONGO}${userProfile.profile_picture_url}`}
+                                    src={userProfile.profile_picture_url}
                                     alt={userProfile.pseudo ? getInitials(userProfile.pseudo) : '?'}
                                     size="lg"
                                     isFollowed={true}
