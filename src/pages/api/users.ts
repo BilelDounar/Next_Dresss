@@ -104,8 +104,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           // erreur EXDEV lors d'un rename entre devices. On gère ce cas en fallback copy/unlink.
           try {
             await fs.promises.rename(uploadedFile.filepath, destPath);
-          } catch (err: any) {
-            if (err?.code === 'EXDEV') {
+          } catch (err: unknown) {
+            const error = err as NodeJS.ErrnoException;
+            if (error?.code === 'EXDEV') {
               // Fallback: copie puis suppression du fichier temporaire
               await fs.promises.copyFile(uploadedFile.filepath, destPath);
               await fs.promises.unlink(uploadedFile.filepath);
