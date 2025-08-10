@@ -49,8 +49,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
 
       // Utiliser formidable pour parser le FormData (photo + champs texte)
-      // Augmente la limite à 10 MB pour accepter des photos de profil haute résolution
-      const form = formidable({ multiples: false, maxFileSize: 10 * 1024 * 1024 }); // 10 MB
+      const form = formidable({ multiples: false, maxFileSize: 5 * 1024 * 1024 }); // 5 MB
 
       try {
         const { fields, files } = await new Promise<{ fields: formidable.Fields; files: formidable.Files }>((resolve, reject) => {
@@ -101,7 +100,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
           const destPath = path.join(uploadsDir, filename);
           await fs.promises.rename(uploadedFile.filepath, destPath);
-          // On stocke l'URL AVEC un slash initial pour qu'elle soit considérée valide par Next/Image
+          // On stocke une URL relative (servie directement par Next.js depuis /public/uploads)
           profile_picture_url = `/uploads/${filename}`;
         }
 
