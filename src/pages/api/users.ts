@@ -86,8 +86,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           const prevRes = await pool.query('SELECT profile_picture_url FROM public.users WHERE id = $1', [id]);
           previousPhoto = prevRes.rows[0]?.profile_picture_url ?? null;
 
-          // On stocke désormais toutes les images directement dans /public/uploads
-          const uploadsDir = path.join(process.cwd(), "public", "uploads");
+          // On stocke désormais toutes les images dans /public/uploads/profile (mieux organisé + cohérent avec la suppression)
+          const uploadsDir = path.join(process.cwd(), "public", "uploads", "profile");
           await fs.promises.mkdir(uploadsDir, { recursive: true });
           const fileExt = path.extname(uploadedFile.originalFilename || "");
 
@@ -100,7 +100,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
           const destPath = path.join(uploadsDir, filename);
           await fs.promises.rename(uploadedFile.filepath, destPath);
-          profile_picture_url = `/uploads/${filename}`;
+          profile_picture_url = `/uploads/profile/${filename}`;
         }
 
         const updated = await updateUserProfile({
