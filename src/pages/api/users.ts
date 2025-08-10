@@ -86,8 +86,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           const prevRes = await pool.query('SELECT profile_picture_url FROM public.users WHERE id = $1', [id]);
           previousPhoto = prevRes.rows[0]?.profile_picture_url ?? null;
 
-          // On stocke désormais toutes les images dans /public/uploads/profile (mieux organisé + cohérent avec la suppression)
-          const uploadsDir = path.join(process.cwd(), "public", "uploads", "profile");
+          // On stocke désormais toutes les images dans /public/uploads
+          const uploadsDir = path.join(process.cwd(), "public", "uploads");
           await fs.promises.mkdir(uploadsDir, { recursive: true });
           const fileExt = path.extname(uploadedFile.originalFilename || "");
 
@@ -100,7 +100,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
           const destPath = path.join(uploadsDir, filename);
           await fs.promises.rename(uploadedFile.filepath, destPath);
-          profile_picture_url = `/uploads/profile/${filename}`;
+          profile_picture_url = `/uploads/${filename}`;
         }
 
         const updated = await updateUserProfile({
@@ -117,7 +117,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
 
         // Supprimer l'ancienne photo si elle existait et qu'une nouvelle a bien été enregistrée
-        if (uploadedFile && previousPhoto && previousPhoto.startsWith('/uploads/profile/')) {
+        if (uploadedFile && previousPhoto && previousPhoto.startsWith('/uploads/')) {
           try {
             const oldPath = path.join(process.cwd(), 'public', previousPhoto);
             await fs.promises.unlink(oldPath);
