@@ -231,6 +231,8 @@ export default function ProfilPage() {
         return name.charAt(0).toUpperCase();
     };
 
+console.log(userProfile);
+
     return (
         <div className="bg-[#F8F5F2] min-h-screen font-serif text-[#333]">
             <div className="max-w-md mx-auto p-4 pt-12 relative">

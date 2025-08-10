@@ -100,7 +100,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
           const destPath = path.join(uploadsDir, filename);
           await fs.promises.rename(uploadedFile.filepath, destPath);
-          // On stocke une URL relative (servie directement par Next.js depuis /public/uploads)
+          // On stocke l'URL AVEC un slash initial pour qu'elle soit considérée valide par Next/Image
           profile_picture_url = `/uploads/${filename}`;
         }
 
