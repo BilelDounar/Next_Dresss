@@ -82,7 +82,7 @@ export default function EditProfileModal({ isOpen, onClose, onSave, initialPseud
     };
 
     return (
-        <div className={`fixed inset-0 bg-[#F5F5F1] z-50 transform transition-transform duration-500 ease-in-out ${isOpen ? 'translate-x-0' : 'translate-x-full'} flex flex-col`}>
+        <div className={`fixed inset-0 bg-[#F5F5F1] h-[89vh] mb-6 z-50 transform transition-transform duration-500 ease-in-out ${isOpen ? 'translate-x-0' : 'translate-x-full'} flex flex-col`}>
             {/* Header */}
             <header className="flex items-center my-8 px-4 ">
                 <button onClick={(e) => { onClose(); e.preventDefault(); }} className="flex items-center font-serif text-lg">

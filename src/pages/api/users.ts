@@ -49,7 +49,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
 
       // Utiliser formidable pour parser le FormData (photo + champs texte)
-      const form = formidable({ multiples: false, maxFileSize: 5 * 1024 * 1024 }); // 5 MB
+      // Augmente la limite à 10 MB pour accepter des photos de profil haute résolution
+      const form = formidable({ multiples: false, maxFileSize: 10 * 1024 * 1024 }); // 10 MB
 
       try {
         const { fields, files } = await new Promise<{ fields: formidable.Fields; files: formidable.Files }>((resolve, reject) => {

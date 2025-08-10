@@ -18,13 +18,15 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: 'api.dresss.cloud',
+        port: '443',
         pathname: '/**',
       },
       {
         protocol: 'https',
-        hostname: 'static.zara.net',
+        hostname: 'dresss.cloud',
+        port: '3000',
         pathname: '/**',
-      }
+      },
     ],
   },
   devIndicators: {

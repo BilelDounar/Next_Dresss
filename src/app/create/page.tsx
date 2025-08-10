@@ -1,7 +1,7 @@
 "use client";
 
 import Button from '@/components/atom/button';
-import { ChevronLeft, SendHorizontal, X, Plus } from 'lucide-react';
+import { ChevronLeft, SendHorizontal, X, Plus, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import "@/app/scroll.css";
@@ -18,9 +18,13 @@ export default function CreatePostPage() {
     const { user } = useRequireAuth();
     const [tags, setTags] = useState<string[]>([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [articles, setArticles] = useState<Article[]>([]);
     // Gestion des messages d’erreurs par champ
     const [errors, setErrors] = useState<{ photos?: string; description?: string; tags?: string; general?: string }>({});
+
+    // Formats d'image acceptés pour les publications
+    const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif'];
 
     const handleAddPhotoClick = () => {
         if (selectedPhotos.length < 10) {
@@ -33,7 +37,17 @@ export default function CreatePostPage() {
             const files = Array.from(event.target.files);
             const remainingSlots = 10 - selectedPhotos.length;
             const filesToAdd = files.slice(0, remainingSlots);
-            setSelectedPhotos(prevPhotos => [...prevPhotos, ...filesToAdd]);
+
+            // Filtre et signale les formats non pris en charge
+            const invalid = filesToAdd.filter(f => !ALLOWED_MIME_TYPES.includes(f.type));
+            if (invalid.length) {
+                setErrors(prev => ({ ...prev, photos: 'Format de fichier non supporté. Utilisez JPG, PNG, WebP, HEIC ou HEIF.' }));
+            }
+            const validFiles = filesToAdd.filter(f => ALLOWED_MIME_TYPES.includes(f.type));
+            if (validFiles.length) {
+                setErrors(prev => ({ ...prev, photos: undefined })); // clear previous format error
+                setSelectedPhotos(prevPhotos => [...prevPhotos, ...validFiles]);
+            }
         }
     };
 
@@ -69,6 +83,8 @@ export default function CreatePostPage() {
         const validationErrors: { photos?: string; description?: string; tags?: string } = {};
         if (selectedPhotos.length === 0) {
             validationErrors.photos = 'Une photo de publication au minimum est requise.';
+        } else if (selectedPhotos.some(p => !ALLOWED_MIME_TYPES.includes(p.type))) {
+            validationErrors.photos = 'Certains fichiers ont un format non supporté (JPG, PNG, WebP, HEIC ou HEIF uniquement).';
         }
         if (tags.length === 0) {
             validationErrors.tags = 'Veuillez sélectionner au moins un tag.';
@@ -80,6 +96,8 @@ export default function CreatePostPage() {
             setErrors(validationErrors);
             return;
         }
+
+        setIsSubmitting(true);
 
         const formData = new FormData();
         formData.append('description', description);
@@ -166,6 +184,8 @@ export default function CreatePostPage() {
             } else {
                 setErrors({ general: 'Une erreur inconnue est survenue.' });
             }
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -228,7 +248,7 @@ export default function CreatePostPage() {
                         ref={fileInputRef}
                         onChange={handleFileChange}
                         className="hidden"
-                        accept="image/png, image/jpeg, image/jpg"
+                        accept="image/png, image/jpeg, image/jpg, image/webp, image/heic, image/heif"
                         multiple
                     />
                 </div>
@@ -285,8 +305,15 @@ export default function CreatePostPage() {
                         </div>
                     </div>
                 </div>
-                <Button type="submit" variant="default" size="lg" iconRight={<SendHorizontal strokeWidth={2.5} />} className=' mt-2 font-outfit font-semibold text-xl'>
-                    Publier
+                <Button
+                    type="submit"
+                    variant="default"
+                    size="lg"
+                    disabled={isSubmitting}
+                    iconRight={isSubmitting ? <Loader2 className="animate-spin" /> : <SendHorizontal strokeWidth={2.5} />}
+                    className='mt-2 font-outfit font-semibold text-xl'
+                >
+                    {isSubmitting ? 'Publication...' : 'Publier'}
                 </Button>
             </div>
             <AddArticleModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onAddArticle={handleAddArticle} />
