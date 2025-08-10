@@ -103,10 +103,6 @@ const VerifyPage = () => {
                     </button>
                 </form>
             )}
-            <p>
-                Si vous n&apos;avez pas reçu l&apos;e-mail, veuillez vérifier votre dossier de spam ou
-                cliquez sur le bouton ci-dessous pour renvoyer l&apos;e-mail de vérification.
-            </p>
         </div>
     );
 };

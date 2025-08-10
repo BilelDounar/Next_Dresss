@@ -92,6 +92,16 @@ export default function VerifyPage() {
                 <p className="text-sm text-gray-500">
                     (Pensez à vérifier votre dossier de courrier indésirable ou spam)
                 </p>
+                {/* Bouton Actualiser */}
+                <div className="pt-2">
+                    <Button
+                        onClick={() => router.refresh()}
+                        className="w-full"
+                        variant="secondary"
+                    >
+                        Actualiser
+                    </Button>
+                </div>
                 <div className="pt-4">
                     <Button
                         onClick={handleResendEmail}

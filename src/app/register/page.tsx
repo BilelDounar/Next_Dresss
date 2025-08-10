@@ -71,7 +71,7 @@ export default function RegisterPage() {
                 height={50}
                 className="mb-8"
             />
-            <h2 className="text-2xl font-bold font-outfit mb-4 text-center">Inscription</h2>
+            <h2 className="text-2xl font-bold font-outfit my-4 mt-10 text-center">Inscription</h2>
 
             <form onSubmit={handleSubmit} className="w-full">
                 {error && (

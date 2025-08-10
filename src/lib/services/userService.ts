@@ -82,30 +82,41 @@ export async function createUser(data: NewUser) {
  * @param userId - L'ID de l'utilisateur.
  * @returns Le nouveau token de vérification ou null si l'utilisateur n'est pas trouvé.
  */
-export async function resetVerificationToken(userId: string): Promise<string | null> {
+export async function resetVerificationToken(userId: string | number): Promise<string | null> {
+    // S'assurer que l'ID est un nombre pour la requête SQL
+    let idParam: string | number = userId;
+    // Si c'est une chaîne de chiffres, on la convertit en nombre, sinon on garde la chaîne (UUID)
+    if (typeof userId === 'string' && /^[0-9]+$/.test(userId)) {
+        idParam = parseInt(userId, 10);
+    }
+
+    if (!idParam) {
+        console.warn('[resetVerificationToken] Invalid userId:', userId);
+        return null;
+    }
+
     const verificationToken = crypto.randomBytes(32).toString('hex');
-    const verificationExpiresAt = new Date(Date.now() + 24 * 3600 * 1000); // 24 heures
+    const verificationExpiresAt = new Date(Date.now() + 24 * 3600 * 1000); // 24 h
 
     const { rows } = await pool.query(
-        `
-        UPDATE public.users
-        SET 
-            verification_token = $1,
-            verification_expires_at = $2,
-            updated_at = NOW()
-        WHERE id = $3
-        RETURNING email
-        `,
-        [verificationToken, verificationExpiresAt, userId]
+        `UPDATE public.users
+         SET verification_token = $1,
+             verification_expires_at = $2,
+             updated_at = NOW()
+         WHERE id = $3
+           AND email_verified = false -- seulement si non vérifié
+         RETURNING email`,
+        [verificationToken, verificationExpiresAt, idParam]
     );
 
     if (rows.length === 0) {
-        return null; // Utilisateur non trouvé
+        console.warn('[resetVerificationToken] No user updated for id', idParam);
+        return null; // Utilisateur introuvable ou déjà vérifié
     }
 
     const { email } = rows[0];
 
-    // Renvoyer l'e-mail de vérification
+    // Envoi de l'e-mail de vérification
     await sendVerificationEmail(email, verificationToken);
 
     return verificationToken;

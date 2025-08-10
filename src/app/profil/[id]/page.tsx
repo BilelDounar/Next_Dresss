@@ -161,7 +161,7 @@ export default function ProfilPage() {
                                     isFollowed={true}
                                 />
                             ) : (
-                                <Avatar src="" alt="?" size="lg" isFollowed={true} />
+                                <Avatar src="" alt={userProfile.pseudo ? getInitials(userProfile.pseudo) : '?'} size="lg" isFollowed={true} />
                             )
                         ) : (
                             <Avatar src="" alt="?" size="lg" isFollowed={true} />
