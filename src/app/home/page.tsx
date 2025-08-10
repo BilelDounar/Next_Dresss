@@ -56,8 +56,11 @@ export default function HomePage() {
             return;
         }
 
-        // Si l'utilisateur n'est pas encore récupéré, on ne fait rien
-        if (!user) return;
+        // Si l'utilisateur n'est pas connecté (aucun user)
+        if (!user) {
+            router.push('/welcome');
+            return;
+        }
 
         // Redirections selon le statut et la vérification d'e-mail (après éventuel refresh)
         if (user.status === 'pending') {
@@ -128,6 +131,8 @@ export default function HomePage() {
     // Afficher le popup de permission push quelques secondes après l'arrivée sur Home
     useEffect(() => {
         if (typeof window === 'undefined') return;
+        // Vérifie que l'API Notification est disponible (certaines navigations privées la désactivent)
+        if (!('Notification' in window)) return;
         if (Notification.permission !== 'default') return; // déjà accordé ou refusé
 
         const timer = setTimeout(() => setShowPush(true), 3000);
