@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, Fragment, useCallback } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import useSave from "@/hooks/useSave";
 import HomeBagIcon from "../home/HomeBagIcon";
 import { Transition } from '@headlessui/react'
 import CardItem from "../home/CardItem";
@@ -10,6 +11,7 @@ import { BookmarkIcon, CommentIcon, HeartIcon, ShareIcon } from "../home/ActionI
 import Image from 'next/image';
 import Avatar from "@/components/atom/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
+import CommentsModal from "@/components/modals/CommentsModal";
 
 // Type pour un article
 type Article = {
@@ -64,9 +66,16 @@ export default function Slide({ publication }: SlideProps) {
     const [dragOffset, setDragOffset] = useState(0);
     const [isDragging, setIsDragging] = useState(false);
 
+    // Ref to store timestamp of last tap for custom double-tap detection on touch devices
+    const lastTap = useRef<number>(0);
+
     const [articles, setArticles] = useState<Article[]>([]);
     const [loadingArticles, setLoadingArticles] = useState(true);
     const [creatorPseudo, setCreatorPseudo] = useState('');
+
+    // Comment modal state
+    const [isCommentsOpen, setIsCommentsOpen] = useState(false);
+    const [commentsCount, setCommentsCount] = useState<number>(publication.comments ?? 0);
 
     const [userProfile, setUserProfile] = useState<UserProfile | null>(null); // État pour le profil complet
 
@@ -272,7 +281,6 @@ export default function Slide({ publication }: SlideProps) {
 
     const [isLiked, setIsLiked] = useState(false);
     const [likesCount, setLikesCount] = useState<number>(publication.likes ?? 0);
-    const [isSaved, setIsSaved] = useState(false);
     const [isAnimatingHeart, setIsAnimatingHeart] = useState(false);
     const [isAnimatingMark, setIsAnimatingMark] = useState(false);
     const apiUrl = process.env.NEXT_PUBLIC_API_MONGO;
@@ -305,11 +313,26 @@ export default function Slide({ publication }: SlideProps) {
         setTimeout(() => setIsAnimatingHeart(false), 200);
     }, [isLiked, updateLike]);
 
+    // Handles double-tap (touch) and double-click (mouse). For touch screens we manually
+    // detect two consecutive taps within 300 ms because React's onDoubleClick is not
+    // fired on touch devices.
     const handleDoubleTap = useCallback(() => {
-        if (!isLiked) {
-            handleHeartToggle();
+        const now = Date.now();
+        if (now - lastTap.current < 300) {
+            // Detected a second tap quickly -> treat as double tap
+            if (!isLiked) {
+                handleHeartToggle();
+            }
         }
+        lastTap.current = now;
     }, [isLiked, handleHeartToggle]);
+
+    // Gestion de l'état "enregistré" via le hook useSave
+    const { saved: isSaved, toggleSave } = useSave({
+        userId: user?.id,
+        itemId: currentPublication?._id,
+        itemType: "publication",
+    });
 
     const actions = [
         {
@@ -323,21 +346,20 @@ export default function Slide({ publication }: SlideProps) {
         },
         {
             icon: <CommentIcon fill="white" />,
-            count: publication.comments,
-            onClick: () => console.log("comment"),
+            count: commentsCount,
+            onClick: () => setIsCommentsOpen(true),
         },
         {
             icon: <ShareIcon fill="white" />,
-            count: publication.shares,
             onClick: () => console.log("share"),
         },
         {
             icon: <div className={`transition-transform duration-200 ease-out ${isAnimatingMark ? "scale-125" : "scale-100"}`}>
                 <BookmarkIcon fill={isSaved ? "yellow" : "white"} />
             </div>,
-            count: publication.saved,
             onClick: () => {
-                setIsSaved(!isSaved);
+                // Met à jour le statut enregistré côté backend + frontend
+                toggleSave();
                 setIsAnimatingMark(true);
                 setTimeout(() => setIsAnimatingMark(false), 200); // réinitialise après 200ms
             },
@@ -371,7 +393,8 @@ export default function Slide({ publication }: SlideProps) {
                         key={`${currentPublication._id}-${idx}`}
                         className="snap-start w-full h-full flex-shrink-0 relative flex items-center justify-center"
                         style={{ minWidth: "100%" }}
-                        onDoubleClick={handleDoubleTap}
+                        onDoubleClick={handleDoubleTap} // desktop / mouse
+                        onTouchEnd={handleDoubleTap}   // mobile / touch
                     >
                         <Image
                             src={`${process.env.NEXT_PUBLIC_API_MONGO}${url}`}
@@ -400,7 +423,14 @@ export default function Slide({ publication }: SlideProps) {
                     <div className="flex flex-row justify-center items-center gap-4">
                         {userProfile ? (
 
-                            <Avatar clickable={true} href={`/profil/${userProfile.id}`} src={userProfile.profile_picture_url.startsWith('/uploads/') ? userProfile.profile_picture_url : `${process.env.NEXT_PUBLIC_API_MONGO ?? ''}${userProfile.profile_picture_url}`} alt={getInitials(userProfile.pseudo)} size="md" isFollowed={true} />
+                            <Avatar
+                                clickable={true}
+                                href={`/profil/${userProfile.id}`}
+                                src={userProfile.profile_picture_url || undefined}
+                                alt={getInitials(userProfile.pseudo ?? '')}
+                                size="md"
+                                isFollowed={true}
+                            />
 
                         ) : (
                             <Skeleton className="w-12 h-12 rounded-full mb-4 bg-white" />
@@ -474,13 +504,29 @@ export default function Slide({ publication }: SlideProps) {
                             </div>
                             <div className=" flex flex-col h-full gap-y-4 overflow-y-scroll pb-28">
                                 {!loadingArticles && articles.map((article) => (
-                                    <CardItem key={article._id} price={article.prix} title={article.titre} description={article.description} urlPhoto={article.urlPhoto} openLink={article.lien || '#'} />
+                                    <CardItem
+                                        key={article._id}
+                                        articleId={article._id}
+                                        price={article.prix}
+                                        title={article.titre}
+                                        description={article.description}
+                                        urlPhoto={article.urlPhoto}
+                                        openLink={article.lien}
+                                    />
                                 ))}
                             </div>
                         </div>
                     </Transition>
                 </div>
             </Transition>
+
+            {/* Comments modal */}
+            <CommentsModal
+                show={isCommentsOpen}
+                onClose={() => setIsCommentsOpen(false)}
+                postId={currentPublication._id}
+                onAdded={() => setCommentsCount((c) => c + 1)}
+            />
         </div>
     );
 }

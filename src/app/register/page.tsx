@@ -8,8 +8,10 @@ import Image from "next/image";
 import { Input } from "@/components/atom/input";
 import Button from "@/components/atom/button";
 import { ArrowLeftIcon } from "lucide-react";
+import { useRedirectIfAuth } from "@/hooks/useRedirectIfAuth";
 
 export default function RegisterPage() {
+    useRedirectIfAuth();
     const router = useRouter();
     const [formData, setFormData] = useState({
         nom: "",
@@ -46,7 +48,7 @@ export default function RegisterPage() {
 
             setSuccess("Inscription réussie !");
             if (data.status === 'pending') {
-                router.push('/about-you');
+                router.push('/login');
             } else {
                 router.push('/home');
             }
@@ -69,7 +71,7 @@ export default function RegisterPage() {
                 height={50}
                 className="mb-8"
             />
-            <h2 className="text-2xl font-bold font-outfit mb-4 text-center">Inscription</h2>
+            <h2 className="text-2xl font-bold font-outfit my-4 mt-10 text-center">Inscription</h2>
 
             <form onSubmit={handleSubmit} className="w-full">
                 {error && (

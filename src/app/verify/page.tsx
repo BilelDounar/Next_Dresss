@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/hooks/useAuth';
 import Button from '@/components/atom/button';
 
 interface UserSession {
@@ -13,6 +14,7 @@ interface UserSession {
 
 export default function VerifyPage() {
     const router = useRouter();
+    const { refreshUser } = useAuth();
     const [user, setUser] = useState<UserSession | null>(null);
     const [loading, setLoading] = useState(true);
     const [resendStatus, setResendStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
@@ -30,6 +32,10 @@ export default function VerifyPage() {
                 setUser(data);
 
                 if (data.email_verified) {
+                    // Mettre à jour le contexte utilisateur pour éviter la boucle home/verify
+                    if (refreshUser) {
+                        await refreshUser();
+                    }
                     router.push('/home');
                 }
                 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -41,7 +47,7 @@ export default function VerifyPage() {
         };
 
         fetchUserStatus();
-    }, [router]);
+    }, [router, refreshUser]);
 
     const handleResendEmail = async () => {
         setResendStatus('sending');
@@ -86,6 +92,16 @@ export default function VerifyPage() {
                 <p className="text-sm text-gray-500">
                     (Pensez à vérifier votre dossier de courrier indésirable ou spam)
                 </p>
+                {/* Bouton Actualiser */}
+                <div className="pt-2">
+                    <Button
+                        onClick={() => router.refresh()}
+                        className="w-full"
+                        variant="secondary"
+                    >
+                        Actualiser
+                    </Button>
+                </div>
                 <div className="pt-4">
                     <Button
                         onClick={handleResendEmail}

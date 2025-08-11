@@ -9,8 +9,10 @@ import { Input } from "@/components/atom/input";
 import Button from "@/components/atom/button";
 import { ArrowLeftIcon } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { useRedirectIfAuth } from "@/hooks/useRedirectIfAuth";
 
 export default function LoginPage() {
+    useRedirectIfAuth();
     const [error, setError] = useState('');
     const router = useRouter();
     const { login } = useAuth();
@@ -36,7 +38,6 @@ export default function LoginPage() {
                 throw new Error(data.error || "Email ou mot de passe incorrect.");
             }
 
-            // Appel correct : on passe l'objet utilisateur (data.user) et le token (data.token)
             login({ user: data.user, token: data.token });
 
             if (data.user.status === 'pending') {
@@ -46,8 +47,12 @@ export default function LoginPage() {
             }
 
         } catch (err) {
-            console.error("Erreur réseau ou de parsing JSON:", err);
-            setError("Impossible de contacter le serveur. Veuillez réessayer.");
+            console.error("Erreur pendant la connexion:", err);
+            if (err instanceof Error && err.message) {
+                setError(err.message);
+            } else {
+                setError("Une erreur inattendue est survenue. Veuillez réessayer.");
+            }
         }
     };
 
@@ -59,11 +64,11 @@ export default function LoginPage() {
             <Image
                 src="/icons/logo_full_fit.png"
                 alt="Logo"
-                width={200}
-                height={200}
-                objectFit="cover"
+                width={150}
+                height={50}
+                className="mb-8"
             />
-            <h2 className="text-2xl font-bold font-outfit mb-4 text-center">Connexion</h2>
+            <h2 className="text-2xl font-bold font-outfit my-4 mt-10 text-center">Connexion</h2>
 
             <form onSubmit={handleSubmit} className="space-y-6 w-full">
                 {error && (

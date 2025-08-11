@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useState, useRef, Fragment } from 'react';
-import { useAuth } from '@/hooks/useAuth';
+import { useRequireAuth } from '@/hooks/useRequireAuth';
 // import CardItem from '../Components/home/CardItem';
 import Button from "@/components/atom/button";
 import Avatar from "@/components/atom/avatar";
-import { Edit, ChevronLeft, Trash, EllipsisVertical } from 'lucide-react';
+import { Edit, ChevronLeft, Trash, EllipsisVertical, Bookmark } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -13,6 +13,7 @@ import Slide from '@/components/navigation/Slide';
 import { Transition, TransitionChild } from '@headlessui/react';
 import EditProfileModal from '@/components/profil/EditProfileModal';
 import SettingsModal from '@/components/profil/SettingsModal';
+import Link from 'next/link';
 
 // Type pour une publication, correspondant à l'API
 interface Publication {
@@ -34,7 +35,7 @@ interface UserProfile {
 }
 
 export default function ProfilPage() {
-    const { user, loading: authLoading } = useAuth();
+    const { user, loading: authLoading, logout } = useRequireAuth();
     const [publications, setPublications] = useState<Publication[]>([]);
     const [publicationsLoading, setPublicationsLoading] = useState(true);
 
@@ -205,6 +206,19 @@ export default function ProfilPage() {
         setIsSettingsOpen(true);
     };
 
+    const handleLogout = async () => {
+        try {
+            // Inform backend (optional) but we rely on client cleanup for safety
+            await fetch('/api/auth/logout', { method: 'POST' });
+        } catch { /* ignore network errors */ }
+
+        // Clean client-side session (localStorage + React state)
+        logout();
+
+        // Redirige vers la page d’accueil publique
+        router.push('/welcome');
+    };
+
     if (authLoading) {
         return <div className="flex items-center justify-center h-screen">Chargement du profil...</div>;
     }
@@ -217,19 +231,16 @@ export default function ProfilPage() {
         return name.charAt(0).toUpperCase();
     };
 
-    console.log(userProfile);
-    console.log(publications);
-
-    const handleLogout = async () => {
-        await fetch('/api/auth/logout', { method: 'POST' });
-        router.push('/welcome');
-        // router.refresh(); // Assure la mise à jour de l'état côté client
-    };
-
+console.log(userProfile);
 
     return (
         <div className="bg-[#F8F5F2] min-h-screen font-serif text-[#333]">
             <div className="max-w-md mx-auto p-4 pt-12 relative">
+
+                {/* Lien vers les éléments sauvegardés */}
+                <Link href="/saves" aria-label="Sauvegardes" className="absolute top-4 left-4 flex items-center p-2">
+                    <Bookmark size={24} />
+                </Link>
 
                 <button onClick={handleModalParameter} aria-label="Paramètres" className="absolute top-4 right-4 flex items-center p-2">
                     <EllipsisVertical size={24} />
@@ -238,11 +249,7 @@ export default function ProfilPage() {
                     {/* Avatar */}
                     {userProfile ? (
                         <Avatar
-                            src={userProfile.profile_picture_url
-                                ? (userProfile.profile_picture_url.startsWith('/uploads/')
-                                    ? userProfile.profile_picture_url
-                                    : `${process.env.NEXT_PUBLIC_API_MONGO ?? ''}${userProfile.profile_picture_url}`)
-                                : undefined}
+                            src={userProfile.profile_picture_url || undefined}
                             alt={getInitials(userProfile.pseudo)}
                             size="lg"
                             isFollowed={true}
@@ -339,10 +346,9 @@ export default function ProfilPage() {
                 </div>
             </div>
 
-            {/* Viewer Modal */}
             {viewerIndex !== null && (
                 <Transition show={viewerIndex !== null} as={Fragment}>
-                    <div className="fixed inset-0 z-50 flex justify-end p-5 pt-12">
+                    <div className="fixed inset-0 z-50 flex justify-center items-center p-5 pt-0">
                         <TransitionChild
                             as={Fragment}
                             enter="ease-out duration-200"
@@ -396,13 +402,9 @@ export default function ProfilPage() {
                 initialBio={userProfile?.bio || ''}
                 initialNom={userProfile?.nom || ''}
                 initialPrenom={userProfile?.prenom || ''}
-                initialPhotoUrl={
-                    ((userProfile?.profile_picture_url?.startsWith('/uploads/') ? '' : (process.env.NEXT_PUBLIC_API_MONGO ?? '')) +
-                        (userProfile?.profile_picture_url ?? ''))
-                }
+                initialPhotoUrl={userProfile?.profile_picture_url ?? ''}
             />
 
-            {/* Settings modal */}
             <SettingsModal
                 isOpen={isSettingsOpen}
                 onClose={() => setIsSettingsOpen(false)}
@@ -411,7 +413,6 @@ export default function ProfilPage() {
                 onLogout={handleLogout}
             />
 
-            {/* Delete confirm modal */}
             {deleteIndex !== null && (
                 <Transition show={deleteIndex !== null} as={Fragment}>
                     <div className="fixed inset-0 z-50 flex items-center justify-center">

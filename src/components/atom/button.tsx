@@ -53,7 +53,17 @@ const Button = ({
             onClick(event);
         }
         if (openLink) {
-            window.location.href = openLink;
+            // Ouvre les liens externes (http/https) dans un nouvel onglet, sinon effectue une navigation classique
+            if (/^https?:\/\//i.test(openLink)) {
+                // Lien externe complet
+                window.open(openLink, "_blank", "noopener,noreferrer");
+            } else if (openLink.startsWith('/')) {
+                // Lien interne relatif à l’application
+                window.location.href = openLink;
+            } else {
+                // Lien externe sans protocole (ex: www.example.com) → on préfixe https://
+                window.open(`https://${openLink}`, "_blank", "noopener,noreferrer");
+            }
         }
     };
 

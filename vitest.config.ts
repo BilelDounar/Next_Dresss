@@ -2,6 +2,8 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { defineConfig } from 'vitest/config';
+import { resolve } from 'node:path';
+import react from '@vitejs/plugin-react';
 
 import { storybookTest } from '@storybook/addon-vitest/vitest-plugin';
 
@@ -10,6 +12,13 @@ const dirname =
 
 // More info at: https://storybook.js.org/docs/next/writing-tests/integrations/vitest-addon
 export default defineConfig({
+  plugins: [react()],
+  // Permet à Vitest/Vite de résoudre l'alias "@/" utilisé dans le code Next.js
+  resolve: {
+    alias: {
+      '@': resolve(dirname, 'src'),
+    },
+  },
   test: {
     workspace: [
       {
@@ -22,12 +31,22 @@ export default defineConfig({
         test: {
           name: 'storybook',
           browser: {
-        enabled: true,
-        headless: true,
-        provider: 'playwright',
-        instances: [{ browser: 'chromium' }]
-      },
+            enabled: true,
+            headless: true,
+            provider: 'playwright',
+            instances: [{ browser: 'chromium' }]
+          },
           setupFiles: ['.storybook/vitest.setup.ts'],
+        },
+      },
+      // Workspace pour les tests unitaires React
+      {
+        extends: true,
+        test: {
+          name: 'unit',
+          environment: 'jsdom',
+          setupFiles: ['./vitest.setup.ts'],
+          globals: true,
         },
       },
     ],

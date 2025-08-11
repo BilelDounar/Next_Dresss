@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from 'react';
+import { useRequireAuth } from '@/hooks/useRequireAuth';
 import Link from 'next/link';
 import { Input } from '@/components/atom/input';
 import Avatar from '@/components/atom/avatar';
@@ -17,12 +18,11 @@ interface UserResult {
 }
 
 export default function SearchPage() {
+    useRequireAuth();
     const [search, setSearch] = useState('');
     const [results, setResults] = useState<UserResult[]>([]);
     const [loading, setLoading] = useState(false);
 
-
-    // Effect pour interroger l'API avec un léger debounce
     useEffect(() => {
         const controller = new AbortController();
 
@@ -50,7 +50,7 @@ export default function SearchPage() {
             } finally {
                 setLoading(false);
             }
-        }, 400); // 400ms debounce
+        }, 400);
 
         return () => {
             clearTimeout(timeout);

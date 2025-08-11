@@ -68,10 +68,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           return undefined;
         };
 
-        const pseudo = parseField(fields.pseudo);
-        const bio = parseField(fields.bio);
-        const nom = parseField(fields.nom);
-        const prenom = parseField(fields.prenom);
+        const pseudo = parseField((fields as Record<string, unknown>).pseudo);
+        const bio = parseField((fields as Record<string, unknown>).bio);
+        const nom = parseField((fields as Record<string, unknown>).nom);
+        const prenom = parseField((fields as Record<string, unknown>).prenom);
 
         let profile_picture_url: string | undefined;
         let previousPhoto: string | null = null;
@@ -86,7 +86,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           const prevRes = await pool.query('SELECT profile_picture_url FROM public.users WHERE id = $1', [id]);
           previousPhoto = prevRes.rows[0]?.profile_picture_url ?? null;
 
-          // On stocke désormais toutes les images directement dans /public/uploads
+          // On stocke désormais toutes les images dans /public/uploads
           const uploadsDir = path.join(process.cwd(), "public", "uploads");
           await fs.promises.mkdir(uploadsDir, { recursive: true });
           const fileExt = path.extname(uploadedFile.originalFilename || "");
@@ -99,7 +99,23 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           const filename = `${id}-profil-${timestamp}-${randomStr}${fileExt}`;
 
           const destPath = path.join(uploadsDir, filename);
-          await fs.promises.rename(uploadedFile.filepath, destPath);
+
+          // Déplacement sécurisé : certains environnements (ex. volumes Docker) provoquent une
+          // erreur EXDEV lors d'un rename entre devices. On gère ce cas en fallback copy/unlink.
+          try {
+            await fs.promises.rename(uploadedFile.filepath, destPath);
+          } catch (err: unknown) {
+            const error = err as NodeJS.ErrnoException;
+            if (error?.code === 'EXDEV') {
+              // Fallback: copie puis suppression du fichier temporaire
+              await fs.promises.copyFile(uploadedFile.filepath, destPath);
+              await fs.promises.unlink(uploadedFile.filepath);
+            } else {
+              throw err;
+            }
+          }
+
+          // On stocke l'URL AVEC un slash initial pour qu'elle soit considérée valide par Next/Image
           profile_picture_url = `/uploads/${filename}`;
         }
 
@@ -117,7 +133,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
 
         // Supprimer l'ancienne photo si elle existait et qu'une nouvelle a bien été enregistrée
-        if (uploadedFile && previousPhoto && previousPhoto.startsWith('/uploads/profile/')) {
+        if (uploadedFile && previousPhoto && previousPhoto.startsWith('/uploads/')) {
           try {
             const oldPath = path.join(process.cwd(), 'public', previousPhoto);
             await fs.promises.unlink(oldPath);

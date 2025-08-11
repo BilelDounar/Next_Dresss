@@ -4,6 +4,8 @@ import { useEffect, useState, useRef } from "react";
 import { useRouter } from 'next/navigation';
 import Slide from "@/components/navigation/Slide";
 import { useAuth } from "@/hooks/useAuth";
+import { usePushPermission } from "@/hooks/usePushPermission";
+import PushPromptModal from "@/components/modals/PushPromptModal";
 import "@/app/scroll.css";
 
 // Type pour une publication, correspondant à l'API
@@ -15,31 +17,67 @@ type Publication = {
 };
 
 export default function HomePage() {
-    const { user, loading: authLoading, error: authError } = useAuth();
+    const { user, loading: authLoading, error: authError, refreshUser } = useAuth();
     const router = useRouter();
     const [publications, setPublications] = useState<Publication[]>([]);
     const [loading, setLoading] = useState(true);
     const [activeIndex, setActiveIndex] = useState(0);
+    const [showPush, setShowPush] = useState(false);
 
     const observer = useRef<IntersectionObserver | null>(null);
     const slideRefs = useRef<(HTMLDivElement | null)[]>([]);
+    /**
+     * Pour éviter une redirection prématurée vers /about-you alors que l'utilisateur
+     * vient tout juste de passer de "pending" à "active" (mais que le contexte n'est
+     * pas encore rafraîchi), on mémorise si l'on a déjà tenté un `refreshUser`.
+     */
+    const hasRefreshed = useRef(false);
 
     useEffect(() => {
-        // Redirection si l'utilisateur a le statut 'pending'
-        if (!authLoading && user && user.status === 'pending') {
-            router.push('/about-you');
+        if (authLoading) return; // attendre la fin du chargement
+
+        // 1. Synchroniser les infos si le profil est encore "pending" au premier rendu
+        if (user && user.status === 'pending' && !hasRefreshed.current && refreshUser) {
+            hasRefreshed.current = true; // éviter de boucler
+            refreshUser();
+            return; // on attend la mise à jour avant toute redirection
         }
+
+        // 2. Vérifier la vérification d'e-mail. Même logique : tenter un refresh avant de rediriger.
+        if (user && user.status === 'active' && !user.email_verified && !hasRefreshed.current && refreshUser) {
+            hasRefreshed.current = true;
+            refreshUser();
+            return;
+        }
+
+        // Gestion des erreurs d'authentification
         if (authError) {
             router.push('/welcome');
+            return;
         }
-    }, [user, authLoading, authError, router]);
+
+        // Si l'utilisateur n'est pas connecté (aucun user)
+        if (!user) {
+            router.push('/welcome');
+            return;
+        }
+
+        // Redirections selon le statut et la vérification d'e-mail (après éventuel refresh)
+        if (user.status === 'pending') {
+            router.push('/about-you');
+        } else if (user.status === 'active' && !user.email_verified) {
+            router.push('/verify');
+        } else if (user.status === 'active' && user.email_verified) {
+            // S'assurer que l'on reste sur /home (utile si l'utilisateur arrive d'une autre route)
+            router.push('/home');
+        }
+    }, [user, authLoading, authError, router, refreshUser]);
 
     useEffect(() => {
         const fetchPublications = async () => {
-            if (!user) {
+            if (!user || user.status !== 'active') {
                 return;
             }
-            if (user.status === 'pending') return;
 
             setLoading(true);
             try {
@@ -90,10 +128,30 @@ export default function HomePage() {
         };
     }, [publications]);
 
+    // Afficher le popup de permission push quelques secondes après l'arrivée sur Home
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+        // Vérifie que l'API Notification est disponible (certaines navigations privées la désactivent)
+        if (!('Notification' in window)) return;
+        if (Notification.permission !== 'default') return; // déjà accordé ou refusé
+
+        const timer = setTimeout(() => setShowPush(true), 3000);
+        return () => clearTimeout(timer);
+    }, []);
+
+    const permission = usePushPermission(showPush);
+
+    // Fermer le modal dès que l'utilisateur répond
+    useEffect(() => {
+        if (permission && permission !== 'default') {
+            setShowPush(false);
+        }
+    }, [permission]);
+
     // Affiche un état de chargement si l'authentification est en cours ou si l'utilisateur va être redirigé
     if (authLoading || (user && user.status === 'pending')) {
         return (
-            <div className="h-screen flex items-center justify-center">
+            <div className="h-screen flex items-center justify-center text-black">
                 <p>Chargement...</p>
             </div>
         );
@@ -104,7 +162,7 @@ export default function HomePage() {
             <div className="snap-y snap-mandatory overflow-y-scroll h-[92vh] w-full bg-primary-300 invisible-scrollbar">
                 {loading ? (
                     <div className="snap-start h-[92vh] flex items-center justify-center">
-                        <p className="fixed top-[40%] right-[40%] text-white">Chargement...</p>
+                        <p className="fixed top-[50%] right-[50%] translate-x-1/2 translate-y-1/2 text-white">Chargement...</p>
                     </div>
                 ) : (
                     publications.length > 0 ? (
@@ -134,6 +192,15 @@ export default function HomePage() {
                     )
                 )}
             </div>
+            {/* Modal d'activation des notifications */}
+            <PushPromptModal
+                show={showPush && permission === 'default'}
+                onAccept={async () => {
+                    await Notification.requestPermission();
+                    setShowPush(false);
+                }}
+                onClose={() => setShowPush(false)}
+            />
         </div>
     );
 }

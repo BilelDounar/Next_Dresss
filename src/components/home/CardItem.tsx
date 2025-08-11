@@ -1,17 +1,22 @@
 import Button from "@/components/atom/button";
-import { Bookmark } from "lucide-react";
-import { ExternalLink } from "lucide-react";
+import { Bookmark, ExternalLink, Minus } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import useSave from "@/hooks/useSave";
 import Image from 'next/image';
 
 interface CardItemProps {
+    articleId: string;
     title: string;
     description: string;
-    price: number;
+    price?: number | null;
     urlPhoto: string;
-    openLink: string;
+    openLink?: string;
 }
 
-const CardItem: React.FC<CardItemProps> = ({ title, description, price, urlPhoto, openLink }) => {
+const CardItem: React.FC<CardItemProps> = ({ articleId, title, description, price, urlPhoto, openLink }) => {
+
+    const { user } = useAuth();
+    const { saved, toggleSave } = useSave({ userId: user?.id, itemId: articleId, itemType: "article" });
 
     return (
         <>
@@ -33,27 +38,32 @@ const CardItem: React.FC<CardItemProps> = ({ title, description, price, urlPhoto
                         <h2 className="font-semibold font-logo text-2xl pb-2">{title}</h2>
                         <p className="text-sm font-normal font-outfit">{description}</p>
                     </div>
-                    <span className="self-stretch justify-center text-black text-2xl font-semibold font-montserrat pb-2">{price} €</span>
+                    {price !== undefined && price !== null && (
+                        <span className="self-stretch justify-center text-black text-2xl font-semibold font-montserrat pb-2">{price} €</span>
+                    )}
                 </div>
             </div>
             <div className="flex flex-row w-full gap-x-2">
                 <Button
-                    variant="default"
+                    variant={saved ? "secondary" : "default"}
                     size="default"
                     className="text-base font-semibold"
+                    onClick={toggleSave}
                 >
-                    Enregistrer
-                    <Bookmark className="" />
+                    {saved ? <Minus /> : <Bookmark />}
+                    {saved ? "Enregistré" : "Enregistrer"}
                 </Button>
-                <Button
-                    variant="secondary"
-                    size="default"
-                    className="text-base font-semibold"
-                    openLink={openLink}
-                >
-                    Consulter
-                    <ExternalLink className="" />
-                </Button>
+                {openLink && (
+                    <Button
+                        variant="secondary"
+                        size="default"
+                        className="text-base font-semibold"
+                        openLink={openLink}
+                    >
+                        Consulter
+                        <ExternalLink className="" />
+                    </Button>
+                )}
             </div>
             <hr className="w-full border-primary-700" />
         </>

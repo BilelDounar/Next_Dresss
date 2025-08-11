@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { useAuth } from '@/hooks/useAuth';
-import Avatar from '@/components/atom/avatar';
+import { useRequireAuth } from '@/hooks/useRequireAuth';
 import Image from 'next/image';
+import NotificationItem from '@/components/notifications/NotificationItem';
 
 interface Notification {
     _id: string;
@@ -18,7 +18,7 @@ interface Notification {
 }
 
 export default function NotificationsPage() {
-    const { user } = useAuth();
+    const { user } = useRequireAuth();
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const [loading, setLoading] = useState(true);
     const [actors, setActors] = useState<Record<string, string>>({});
@@ -81,66 +81,6 @@ export default function NotificationsPage() {
                     height={128}
                     className="opacity-7"
                 />
-            </div>
-        </div>
-    );
-}
-
-interface NotificationItemProps {
-    notification: Notification;
-    actors: Record<string, string>;
-}
-
-function NotificationItem({ notification, actors }: NotificationItemProps) {
-    const formatRelative = (dateStr: string) => {
-        const diffMs = Date.now() - new Date(dateStr).getTime();
-        const sec = Math.floor(diffMs / 1000);
-        if (sec < 60) return `${sec}s`;
-        const min = Math.floor(sec / 60);
-        if (min < 60) return `${min}m`;
-        const h = Math.floor(min / 60);
-        if (h < 24) return `${h}h`;
-        const d = Math.floor(h / 24);
-        return `${d}j`;
-    };
-
-    const message = notification.kind === 'follow'
-        ? ` a commencé à vous suivre`
-        : notification.text;
-
-    return (
-        <div className="flex justify-between items-start bg-[#F8F5F2] p-2 rounded">
-            {/* Avatar + texte */}
-            <div className="flex items-start gap-x-3 max-w-[70%]">
-                <Avatar
-                    alt={actors[notification.from].charAt(0).toUpperCase()}
-                    size="sm"
-                    src={notification.from.startsWith('/uploads/') ? notification.from : `${process.env.NEXT_PUBLIC_API_MONGO ?? ''}${notification.from}`}
-                    clickable={true}
-                    href={`/profil/${notification.from}`}
-                    isFollowed={true}
-                />
-                <p className="text-sm leading-snug line-clamp-2">
-                    <span className="font-bold">@{actors[notification.from]}</span>
-                    {message}
-                </p>
-            </div>
-
-            {/* preview + time */}
-            <div className="flex flex-row items-center justify-center gap-x-2">
-                {/* Si on a un visuel (ex: like sur un look) */}
-                {notification.targetType === 'post' && (
-                    <Image
-                        src={`${process.env.NEXT_PUBLIC_API_MONGO}${notification.targetId}`}
-                        alt="Préview"
-                        width={48}
-                        height={48}
-                        className="rounded object-cover size-12"
-                    />
-                )}
-                <span className="text-xs text-gray-500 whitespace-nowrap">
-                    {formatRelative(notification.createdAt)}
-                </span>
             </div>
         </div>
     );

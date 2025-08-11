@@ -8,6 +8,7 @@ interface User {
     username: string;
     email: string;
     status: 'pending' | 'active' | 'disabled';
+    email_verified: boolean;
 }
 
 interface LoginCredentials {
@@ -36,6 +37,7 @@ interface AuthContextType {
     login: (data: LoginData) => Promise<void>;
     register: (data: RegisterData) => Promise<void>;
     logout: () => void;
+    refreshUser: () => Promise<void>;
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -74,12 +76,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const login = async (data: LoginData) => {
         try {
             if ('email' in data) {
-                // credentials provided, call backend
                 const response = await axios.post(`${process.env.NEXT_PUBLIC_API_MONGO}/auth/login`, data);
                 const { user, token } = response.data;
                 handleAuth(user, token);
             } else if ('user' in data && 'token' in data) {
-                // already authenticated payload
                 handleAuth(data.user, data.token);
             }
         } catch (err) {
@@ -108,8 +108,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         router.push('/login');
     };
 
+    const refreshUser = async () => {
+        try {
+            const response = await axios.get('/api/auth/me');
+            const updatedUser = response.data;
+            setUser(updatedUser);
+            localStorage.setItem('user', JSON.stringify(updatedUser));
+        } catch (err) {
+            console.error('Failed to refresh user info', err);
+        }
+    };
+
     return (
-        <AuthContext.Provider value={{ user, token, loading, error, login, register, logout }}>
+        <AuthContext.Provider value={{ user, token, loading, error, login, register, logout, refreshUser }}>
             {children}
         </AuthContext.Provider>
     );

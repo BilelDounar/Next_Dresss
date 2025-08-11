@@ -4,8 +4,9 @@ import jwt from 'jsonwebtoken';
 import { resetVerificationToken } from '@/lib/services/userService';
 
 interface JwtPayload {
-    userId: string;
-    email: string;
+    id?: string | number;
+    userId?: string | number;
+    email?: string;
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -25,10 +26,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     try {
         console.log('[2] Décodage du token JWT...');
         const decoded = jwt.verify(token, process.env.JWT_SECRET!) as JwtPayload;
-        console.log(`[3] Token décodé avec succès. UserID: ${decoded.userId}`);
+        // compatibilité : certains tokens portent "id" au lieu de "userId"
+        const userId = decoded.userId ?? decoded.id;
+        console.log(`[3] Token décodé avec succès. UserID: ${userId}`);
+
+        if (!userId) {
+            console.log('[ERREUR] Aucun userId dans le token.');
+            return res.status(400).json({ error: 'Invalid token payload' });
+        }
 
         console.log('[4] Appel de resetVerificationToken...');
-        const new_token = await resetVerificationToken(decoded.userId);
+        const new_token = await resetVerificationToken(userId);
 
         if (!new_token) {
             console.log('[ERREUR] resetVerificationToken a échoué (utilisateur non trouvé ou erreur de mise à jour).');
