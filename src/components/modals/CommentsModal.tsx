@@ -171,7 +171,15 @@ export default function CommentsModal({ show, onClose, postId, onAdded }: Commen
                                                 <Avatar
                                                     clickable={true}
                                                     href={`/profil/${c.user}`}
-                                                    src={info?.profile_picture_url || undefined}
+                                                    src={
+                                                        info?.profile_picture_url
+                                                            ? (
+                                                                info?.profile_picture_url.startsWith('https')
+                                                                    ? info?.profile_picture_url
+                                                                    : `${process.env.NEXT_PUBLIC_IMAGE_BASE}${info?.profile_picture_url.replace(/^\/uploads/, '')}`
+                                                            )
+                                                            : undefined
+                                                    }   
                                                     alt={info?.pseudo ? info.pseudo.charAt(0).toUpperCase() : "?"}
                                                     size="md"
                                                     isFollowed={true}

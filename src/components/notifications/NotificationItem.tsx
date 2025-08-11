@@ -45,7 +45,15 @@ export default function NotificationItem({ notification, actors }: NotificationI
                 <Avatar
                     alt={initial}
                     size="sm"
-                    src={notification.from || undefined}
+                    src={
+                        notification.from
+                            ? (
+                                notification.from.startsWith('https')
+                                    ? notification.from
+                                    : `${process.env.NEXT_PUBLIC_IMAGE_BASE}${notification.from.replace(/^\/uploads/, '')}`
+                            )
+                            : undefined
+                    }
                     clickable={true}
                     href={`/profil/${notification.from}`}
                     isFollowed={true}

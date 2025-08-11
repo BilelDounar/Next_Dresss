@@ -155,7 +155,15 @@ export default function ProfilPage() {
                         userProfile ? (
                             userProfile.profile_picture_url ? (
                                 <Avatar
-                                    src={userProfile.profile_picture_url}
+                                    src={
+                                        userProfile.profile_picture_url
+                                            ? (
+                                                userProfile.profile_picture_url.startsWith('https')
+                                                    ? userProfile.profile_picture_url
+                                                    : `${process.env.NEXT_PUBLIC_IMAGE_BASE}${userProfile.profile_picture_url.replace(/^\/uploads/, '')}`
+                                            )
+                                            : undefined
+                                    }
                                     alt={userProfile.pseudo ? getInitials(userProfile.pseudo) : '?'}
                                     size="lg"
                                     isFollowed={true}

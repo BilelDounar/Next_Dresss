@@ -101,7 +101,15 @@ export default function SearchPage() {
                                     <div className="flex items-center gap-x-3">
                                         <Avatar
                                             alt={getInitials(user.pseudo)}
-                                            src={user.profile_picture_url || undefined}
+                                            src={
+                                                user.profile_picture_url
+                                                    ? (
+                                                        user.profile_picture_url.startsWith('https')
+                                                            ? user.profile_picture_url
+                                                            : `${process.env.NEXT_PUBLIC_IMAGE_BASE}${user.profile_picture_url.replace(/^\/uploads/, '')}`
+                                                    )
+                                                    : undefined
+                                            }
                                             size="md"
                                             clickable
                                             isFollowed={true}

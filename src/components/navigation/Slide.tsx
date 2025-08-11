@@ -426,7 +426,15 @@ export default function Slide({ publication }: SlideProps) {
                             <Avatar
                                 clickable={true}
                                 href={`/profil/${userProfile.id}`}
-                                src={userProfile.profile_picture_url || undefined}
+                                src={
+                                    userProfile.profile_picture_url
+                                        ? (
+                                            userProfile.profile_picture_url.startsWith('https')
+                                                ? userProfile.profile_picture_url
+                                                : `${process.env.NEXT_PUBLIC_IMAGE_BASE}${userProfile.profile_picture_url.replace(/^\/uploads/, '')}`
+                                        )
+                                        : undefined
+                                }
                                 alt={getInitials(userProfile.pseudo ?? '')}
                                 size="md"
                                 isFollowed={true}
