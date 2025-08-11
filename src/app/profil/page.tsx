@@ -248,12 +248,19 @@ console.log(userProfile);
                 <div className="flex flex-col items-center">
                     {/* Avatar */}
                     {userProfile ? (
-                        <Avatar
-                            src={userProfile.profile_picture_url || undefined}
-                            alt={getInitials(userProfile.pseudo)}
-                            size="lg"
-                            isFollowed={true}
+                       <Avatar
+                        src={
+                            userProfile.profile_picture_url
+                            ? `${process.env.NEXT_PUBLIC_IMAGE_BASE}${
+                                userProfile.profile_picture_url.replace(/^\/uploads/, '')
+                                }`
+                            : undefined
+                        }
+                        alt={getInitials(userProfile.pseudo)}
+                        size="lg"
+                        isFollowed
                         />
+
                     ) : (
                         <Skeleton className="w-24 h-24 rounded-full mb-4 bg-primary-300" />
                     )}
