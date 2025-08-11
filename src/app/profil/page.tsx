@@ -231,7 +231,7 @@ export default function ProfilPage() {
         return name.charAt(0).toUpperCase();
     };
 
-console.log(userProfile);
+    console.log(userProfile);
 
     return (
         <div className="bg-[#F8F5F2] min-h-screen font-serif text-[#333]">
@@ -248,17 +248,19 @@ console.log(userProfile);
                 <div className="flex flex-col items-center">
                     {/* Avatar */}
                     {userProfile ? (
-                       <Avatar
-                        src={
-                            userProfile.profile_picture_url
-                            ? `${process.env.NEXT_PUBLIC_IMAGE_BASE}${
-                                userProfile.profile_picture_url.replace(/^\/uploads/, '')
-                                }`
-                            : undefined
-                        }
-                        alt={getInitials(userProfile.pseudo)}
-                        size="lg"
-                        isFollowed
+                        <Avatar
+                            src={
+                                userProfile.profile_picture_url
+                                    ? (
+                                        userProfile.profile_picture_url.startsWith('https')
+                                            ? userProfile.profile_picture_url
+                                            : `${process.env.NEXT_PUBLIC_IMAGE_BASE}${userProfile.profile_picture_url.replace(/^\/uploads/, '')}`
+                                    )
+                                    : undefined
+                            }
+                            alt={getInitials(userProfile.pseudo)}
+                            size="lg"
+                            isFollowed
                         />
 
                     ) : (
