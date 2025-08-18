@@ -38,9 +38,10 @@ const CardItem: React.FC<CardItemProps> = ({ articleId, title, description, pric
                         <h2 className="font-semibold font-logo text-2xl pb-2">{title}</h2>
                         <p className="text-sm font-normal font-outfit">{description}</p>
                     </div>
-                    {price !== undefined && price !== null && (
+                    {price !== undefined && price !== null && price !== 0 && (
                         <span className="self-stretch justify-center text-black text-2xl font-semibold font-montserrat pb-2">{price} €</span>
                     )}
+                    {price === 0 && null}
                 </div>
             </div>
             <div className="flex flex-row w-full gap-x-2">
